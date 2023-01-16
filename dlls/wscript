@@ -26,16 +26,20 @@ def build(bld):
 	])
 
 	source += [
+		'addition.cpp',
+		'admin.cpp',
 		'agrunt.cpp',
 		'airtank.cpp',
 		'aflock.cpp',
 		'animating.cpp',
 		'animation.cpp',
-		'apache.cpp', 
+		'apache.cpp',
+		'agtimer.cpp',
 		'barnacle.cpp',
 		'barney.cpp',
 		'bigmomma.cpp',
 		'bloater.cpp',
+		'BMOD_flyingcrowbar.cpp',
 		'bmodels.cpp',
 		'bullsquid.cpp',
 		'buttons.cpp', 

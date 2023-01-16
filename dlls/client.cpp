@@ -39,6 +39,7 @@
 #include "usercmd.h"
 #include "netadr.h"
 #include "pm_shared.h"
+#include "addition.h"
 
 extern DLL_GLOBAL ULONG		g_ulModelIndexPlayer;
 extern DLL_GLOBAL BOOL		g_fGameOver;
@@ -57,6 +58,8 @@ extern int g_teamplay;
 
 extern cvar_t bhopcap;
 extern "C" int g_bhopcap;
+
+extern int gmsgScoreInfo;
 
 void LinkUserMessages( void );
 
@@ -109,7 +112,10 @@ void ClientDisconnect( edict_t *pEntity )
 
 	char text[256] = "";
 	if( pEntity->v.netname )
-		_snprintf( text, sizeof(text), "- %s has left the game\n", STRING( pEntity->v.netname ) );
+	{
+		_snprintf( text, sizeof(text) - 1, "- %s has left the game\n", STRING( pEntity->v.netname ) );
+		text[sizeof(text) - 1] = '\0';
+	}
 	MESSAGE_BEGIN( MSG_ALL, gmsgSayText, NULL );
 		WRITE_BYTE( ENTINDEX( pEntity ) );
 		WRITE_STRING( text );
@@ -206,6 +212,12 @@ void ClientPutInServer( edict_t *pEntity )
 
 	pPlayer->pev->iuser1 = 0;
 	pPlayer->pev->iuser2 = 0;
+
+	if( g_pGameRules->IsMultiplayer() && mp_anticheat.value && !pPlayer->IsAdmin )
+	{
+		pPlayer->m_flCheckCvars = gpGlobals->time + 10;
+		g_engfuncs.pfnQueryClientCvarValue2( pEntity, "host_ver", 119 );
+	}
 }
 
 #if !NO_VOICEGAMEMGR
@@ -352,13 +364,15 @@ void Host_Say( edict_t *pEntity, int teamonly )
 	{
 		if( CMD_ARGC() >= 2 )
 		{
-			sprintf( szTemp, "%s %s", (char *)pcmd, (char *)CMD_ARGS() );
+			_snprintf( szTemp, sizeof(szTemp) - 1, "%s %s", (char *)pcmd, (char *)CMD_ARGS() );
 		}
 		else
 		{
 			// Just a one word command, use the first word...sigh
-			sprintf( szTemp, "%s", (char *)pcmd );
+			strncpy( szTemp, (char *)pcmd, sizeof(szTemp) - 1 );
 		}
+		szTemp[sizeof(szTemp) - 1] = '\0';
+
 		p = szTemp;
 	}
 
@@ -373,12 +387,18 @@ void Host_Say( edict_t *pEntity, int teamonly )
 		return;  // no character found, so say nothing
 
 	// turn on color set 2  (color on,  no sound)
-	if( player->IsObserver() && ( teamonly ) )
-		sprintf( text, "%c(SPEC) %s: ", 2, STRING( pEntity->v.netname ) );
+	if( player->IsObserver())
+		if(player->IsAdmin)
+			_snprintf( text, sizeof(text) - 1, "%c(ADMIN-SPEC) %s: ", 2, STRING( pEntity->v.netname ) );
+		else
+			_snprintf( text, sizeof(text) - 1, "%c(SPEC) %s: ", 2, STRING( pEntity->v.netname ) );
 	else if( teamonly )
-		sprintf( text, "%c(TEAM) %s: ", 2, STRING( pEntity->v.netname ) );
+		_snprintf( text, sizeof(text) - 1, "%c(TEAM) %s: ", 2, STRING( pEntity->v.netname ) );
+	else if(player->IsAdmin)
+		_snprintf( text, sizeof(text) - 1, "%c(ADMIN) %s: ", 2, STRING( pEntity->v.netname ) );
 	else
-		sprintf( text, "%c%s: ", 2, STRING( pEntity->v.netname ) );
+		_snprintf( text, sizeof(text) - 1, "%c%s: ", 2, STRING( pEntity->v.netname ) );
+	text[sizeof(text) - 1] = '\0';
 
 	j = sizeof( text ) - 2 - strlen( text );  // -2 for /n and null terminator
 	if( (int)strlen( p ) > j )
@@ -535,6 +555,11 @@ void ClientCommand( edict_t *pEntity )
 	}
 	else if( FStrEq( pcmd, "drop" ) )
 	{
+		CBasePlayer *pPlayer = GetClassPtr( (CBasePlayer *)pev );
+
+		if ( !mp_allowdrop.value )
+			return ChatPrintf( pPlayer, "Drop is disabled.\n" );
+
 		// player is dropping an item. 
 		GetClassPtr( (CBasePlayer *)pev )->DropPlayerItem( (char *)CMD_ARGV( 1 ) );
 	}
@@ -567,7 +592,7 @@ void ClientCommand( edict_t *pEntity )
 		if( !pPlayer->IsObserver() )
 		{
 			// always allow proxies to become a spectator
-			if( ( pev->flags & FL_PROXY ) || allow_spectators.value )
+			if( ( pev->flags & FL_PROXY ) || allow_spectators.value || pPlayer->IsAdmin )
 			{
 				edict_t *pentSpawnSpot = g_pGameRules->GetPlayerSpawnSpot( pPlayer );
 				pPlayer->StartObserver( pev->origin, VARS( pentSpawnSpot )->angles );
@@ -615,7 +640,32 @@ void ClientCommand( edict_t *pEntity )
 		// clear 'Unknown command: VModEnable' in singleplayer
 		return;
 	}
-	else
+	else if( FStrEq(pcmd, "resetscore") || FStrEq(pcmd, "rs") )
+	{
+		CBasePlayer *pPlayer = GetClassPtr( (CBasePlayer *)pev );
+
+		if( pPlayer->pev->frags == 0 && pPlayer->m_iDeaths == 0 )
+			return;
+
+		pPlayer->RemoveAllItems( TRUE );
+		pPlayer->pev->frags = 0; // pefrect zero
+		pPlayer->m_iDeaths = 0; // perfect zero
+
+		// update the scores
+		MESSAGE_BEGIN( MSG_ALL, gmsgScoreInfo );
+				WRITE_BYTE( ENTINDEX(pPlayer->edict()) );
+				WRITE_SHORT( (int)pPlayer->pev->frags );
+				WRITE_SHORT( pPlayer->m_iDeaths );
+				WRITE_SHORT( 0 );
+				WRITE_SHORT( 0 );
+		MESSAGE_END();
+
+		pPlayer->Spawn();
+
+		ChatPrintf( pPlayer, "^6Your score has been reset^7\n" );
+		return;
+	}
+	else if( !Addition_ClientCommand( GetClassPtr( (CBasePlayer *)pev ), pcmd ))
 	{
 		// tell the user they entered an unknown command
 		char command[128];
@@ -667,7 +717,8 @@ void ClientUserInfoChanged( edict_t *pEntity, char *infobuffer )
 		if( gpGlobals->maxClients > 1 )
 		{
 			char text[256];
-			_snprintf( text, 256, "* %s changed name to %s\n", STRING( pEntity->v.netname ), g_engfuncs.pfnInfoKeyValue( infobuffer, "name" ) );
+			_snprintf( text, sizeof(text) - 1, "* %s changed name to %s\n", STRING( pEntity->v.netname ), g_engfuncs.pfnInfoKeyValue( infobuffer, "name" ) );
+			text[sizeof(text) - 1] = '\0';
 			MESSAGE_BEGIN( MSG_ALL, gmsgSayText, NULL );
 				WRITE_BYTE( ENTINDEX( pEntity ) );
 				WRITE_STRING( text );
@@ -768,6 +819,21 @@ void PlayerPreThink( edict_t *pEntity )
 
 	if( pPlayer )
 		pPlayer->PreThink();
+
+	if( mp_anticheat.value && g_pGameRules->IsMultiplayer() && !pPlayer->IsAdmin )
+	{
+		if( pPlayer->m_flCheckCvars <= gpGlobals->time )
+		{
+			g_engfuncs.pfnQueryClientCvarValue2( pEntity, "r_drawentities", 112 );
+			g_engfuncs.pfnQueryClientCvarValue2( pEntity, "gl_wh", 114 );
+			g_engfuncs.pfnQueryClientCvarValue2( pEntity, "cl_wh", 115 );
+			g_engfuncs.pfnQueryClientCvarValue2( pEntity, "cl_aim", 116 );
+			g_engfuncs.pfnQueryClientCvarValue2( pEntity, "aim", 117 );
+			g_engfuncs.pfnQueryClientCvarValue2( pEntity, "gl_wireframe", 118 );
+			g_engfuncs.pfnQueryClientCvarValue2( pEntity, "bae", 119 );
+			pPlayer->m_flCheckCvars = gpGlobals->time + 10;
+		}
+	}
 }
 
 /*
@@ -817,7 +883,7 @@ void StartFrame( void )
 	g_ulFrameCount++;
 
 	int oldBhopcap = g_bhopcap;
-	g_bhopcap = ( g_pGameRules->IsMultiplayer() && bhopcap.value != 0.0f ) ? 1 : 0;
+	g_bhopcap = ( g_pGameRules && g_pGameRules->IsMultiplayer() && bhopcap.value != 0.0f ) ? 1 : 0;
 	if( g_bhopcap != oldBhopcap )
 	{
 		MESSAGE_BEGIN( MSG_ALL, gmsgBhopcap, NULL );
@@ -1917,6 +1983,50 @@ void CreateInstancedBaselines( void )
 
 	// Destroy objects.
 	//UTIL_Remove( pc );
+}
+
+void CvarValue2( const edict_t *pEnt, int requestID, const char *cvarName, const char *value )
+{
+	CBasePlayer *player = (CBasePlayer * ) CBaseEntity::Instance( (edict_t*)pEnt );
+
+	if( mp_anticheat.value && !player->IsAdmin )
+	{
+		if( pEnt && requestID == 112 && FStrEq( cvarName , "r_drawentities" ) && (atoi( value ) == 5 || atoi( value ) == 10 ) )
+			KickCheater( player, "wallhack" );
+
+		if( pEnt && requestID == 113 && FStrEq( cvarName , "r_lockpvs" ) && atoi( value ) )
+			KickCheater( player, "lockpvs" );
+
+		if( pEnt && requestID == 114 && FStrEq( cvarName , "gl_wh" ) && atoi( value ) )
+			KickCheater( player, "gl_wh" );
+
+		if( pEnt && requestID == 115 && FStrEq( cvarName , "cl_wh" ) && atoi( value ) )
+			KickCheater( player, "cl_wh" );
+
+		if( pEnt && requestID == 116 && FStrEq( cvarName , "cl_aim" ) && atoi( value ) )
+			KickCheater( player, "cl_aim" );
+
+		if( pEnt && requestID == 117 && FStrEq( cvarName , "aim" ) && atoi( value ) )
+			KickCheater( player, "aim" );
+
+		if( pEnt && requestID == 118 && FStrEq( cvarName , "gl_wireframe" ) && atoi( value ) )
+                        KickCheater( player, "gl_wireframe" );
+
+		if( pEnt && requestID == 119 && FStrEq( cvarName , "bae" ) && atoi( value ) )
+			KickCheater( player, "bae" );
+
+		if( pEnt && requestID == 120 && FStrEq( cvarName , "host_ver" ) )
+		{
+			if( !strcmp( value , "eee764" ) )
+				KickCheater( player, "build eee764" );
+
+			if( !strcmp( value , "7a3ffb" ) )
+				KickCheater( player, "build 7a3ffb" );
+
+			if( !strcmp( value , "235225" ) )
+				KickCheater( player, "build 235225" );
+		}
+	}
 }
 
 /*

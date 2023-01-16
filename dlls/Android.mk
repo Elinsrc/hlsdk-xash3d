@@ -30,6 +30,9 @@ LOCAL_C_INCLUDES := $(SDL_PATH)/include \
 
 LOCAL_SRC_FILES := agrunt.cpp airtank.cpp \
            aflock.cpp \
+           addition.cpp \
+           admin.cpp \
+           BMOD_flyingcrowbar.cpp \
            animating.cpp \
            animation.cpp \
            apache.cpp \

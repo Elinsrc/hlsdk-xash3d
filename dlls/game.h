@@ -33,6 +33,7 @@ extern cvar_t satchelfix;
 extern cvar_t explosionfix;
 extern cvar_t monsteryawspeedfix;
 extern cvar_t corpsephysics;
+extern cvar_t pushablemode;
 extern cvar_t forcerespawn;
 extern cvar_t flashlight;
 extern cvar_t aimcrosshair;
@@ -41,6 +42,11 @@ extern cvar_t teamlist;
 extern cvar_t teamoverride;
 extern cvar_t defaultteam;
 extern cvar_t allowmonsters;
+
+extern cvar_t mp_anticheat;
+extern cvar_t mp_flying_crowbar;
+extern cvar_t mp_clock;
+extern cvar_t mp_allowdrop;
 
 // Engine Cvars
 extern cvar_t *g_psv_gravity;

@@ -54,3 +54,44 @@ extern "C" void DLLEXPORT EXPORT2 GiveFnptrsToDll( enginefuncs_t *pengfuncsFromE
 	memcpy( &g_engfuncs, pengfuncsFromEngine, sizeof(enginefuncs_t) );
 	gpGlobals = pGlobals;
 }
+
+int ShouldCollide( edict_t *pentTouched, edict_t *pentOther )
+{
+	return 1;
+}
+
+void OnFreeEntPrivateData(edict_s *pEdict)
+{
+	// stub
+}
+
+void GameShutdown(void)
+{
+
+}
+
+void CvarValue( const edict_t *pEnt, const char *value )
+{
+}
+
+void CvarValue2( const edict_t *pEnt, int requestID, const char *cvarName, const char *value );
+
+NEW_DLL_FUNCTIONS gNewDLLFunctions =
+{
+	OnFreeEntPrivateData, //pfnOnFreeEntPrivateData
+	GameShutdown, //pfnGameShutdown
+	ShouldCollide, //pfnShouldCollide
+	CvarValue,
+	CvarValue2
+};
+
+extern "C" int DLLEXPORT EXPORT2 GetNewDLLFunctions(NEW_DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion)
+{
+	if(!pFunctionTable || *interfaceVersion != NEW_DLL_FUNCTIONS_VERSION)
+	{
+		*interfaceVersion = NEW_DLL_FUNCTIONS_VERSION;
+		return FALSE;
+	}
+	memcpy(pFunctionTable, &gNewDLLFunctions, sizeof(gNewDLLFunctions));
+	return TRUE;
+}

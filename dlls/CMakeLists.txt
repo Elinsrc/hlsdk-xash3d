@@ -36,16 +36,20 @@ else()
 endif()
 
 set (SVDLL_SOURCES
+	addition.cpp
+	admin.cpp
 	agrunt.cpp
 	airtank.cpp
 	aflock.cpp
 	animating.cpp
 	animation.cpp
+	agtimer.cpp
 	apache.cpp
 	barnacle.cpp
 	barney.cpp
 	bigmomma.cpp
 	bloater.cpp
+	BMOD_flyingcrowbar.cpp
 	bmodels.cpp
 	bullsquid.cpp
 	buttons.cpp

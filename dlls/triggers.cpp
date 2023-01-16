@@ -1838,12 +1838,12 @@ void CBaseTrigger::TeleportTouch( CBaseEntity *pOther )
 	edict_t	*pentTarget = NULL;
 
 	// Only teleport monsters or clients
-	if( !FBitSet( pevToucher->flags, FL_CLIENT | FL_MONSTER ) )
-		return;
+	/*if( !FBitSet( pevToucher->flags, FL_CLIENT | FL_MONSTER ) )
+		return;*/
 
 	if( !UTIL_IsMasterTriggered( m_sMaster, pOther ) )
 		return;
- 	
+
 	if( !( pev->spawnflags & SF_TRIGGER_ALLOWMONSTERS ) )
 	{
 		// no monsters allowed!
@@ -1864,7 +1864,7 @@ void CBaseTrigger::TeleportTouch( CBaseEntity *pOther )
 
 	pentTarget = FIND_ENTITY_BY_TARGETNAME( pentTarget, STRING( pev->target ) );
 	if( FNullEnt( pentTarget ) )
-	   return;	
+	   return;
 
 	Vector tmp = VARS( pentTarget )->origin;
 

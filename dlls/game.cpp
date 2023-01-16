@@ -16,6 +16,7 @@
 #include "eiface.h"
 #include "util.h"
 #include "game.h"
+#include "admin.h"
 
 BOOL		g_fIsXash3D;
 
@@ -34,10 +35,11 @@ cvar_t falldamage	= { "mp_falldamage","0", FCVAR_SERVER };
 cvar_t weaponstay	= { "mp_weaponstay","0", FCVAR_SERVER };
 cvar_t selfgauss	= { "selfgauss", "1", FCVAR_SERVER };
 cvar_t chargerfix	= { "chargerfix", "0", FCVAR_SERVER };
-cvar_t satchelfix	= { "satchelfix", "0", FCVAR_SERVER };
-cvar_t explosionfix	= { "explosionfix", "0", FCVAR_SERVER };
+cvar_t satchelfix	= { "satchelfix", "1", FCVAR_SERVER };
+cvar_t explosionfix	= { "explosionfix", "1", FCVAR_SERVER };
 cvar_t monsteryawspeedfix	= { "monsteryawspeedfix", "1", FCVAR_SERVER };
 cvar_t corpsephysics = { "corpsephysics", "0", FCVAR_SERVER };
+cvar_t pushablemode = { "pushablemode", "0", FCVAR_SERVER };
 cvar_t forcerespawn	= { "mp_forcerespawn","1", FCVAR_SERVER };
 cvar_t flashlight	= { "mp_flashlight","0", FCVAR_SERVER };
 cvar_t aimcrosshair	= { "mp_autocrosshair","1", FCVAR_SERVER };
@@ -46,12 +48,17 @@ cvar_t teamlist		= { "mp_teamlist","hgrunt;scientist", FCVAR_SERVER };
 cvar_t teamoverride	= { "mp_teamoverride","1" };
 cvar_t defaultteam	= { "mp_defaultteam","0" };
 cvar_t allowmonsters	= { "mp_allowmonsters","0", FCVAR_SERVER };
-cvar_t bhopcap		= { "mp_bhopcap", "1", FCVAR_SERVER };
+cvar_t bhopcap		= { "mp_bhopcap", "0", FCVAR_SERVER };
 
-cvar_t allow_spectators = { "allow_spectators", "0", FCVAR_SERVER };	// 0 prevents players from being spectators
+cvar_t allow_spectators = { "allow_spectators", "1", FCVAR_SERVER };	// 0 prevents players from being spectators
 cvar_t multibyte_only = { "mp_multibyte_only", "0", FCVAR_SERVER };
 
 cvar_t mp_chattime	= { "mp_chattime","10", FCVAR_SERVER };
+
+cvar_t mp_anticheat = { "mp_anticheat", "1", FCVAR_SERVER };
+cvar_t mp_flying_crowbar = { "mp_flying_crowbar", "1", FCVAR_SERVER };
+cvar_t mp_clock = { "mp_clock", "1", FCVAR_SERVER };
+cvar_t mp_allowdrop = { "mp_allowdrop", "1", FCVAR_SERVER };
 
 // Engine Cvars
 cvar_t *g_psv_gravity = NULL;
@@ -464,6 +471,8 @@ void GameDLLInit( void )
 	if( CVAR_GET_POINTER( "build" ) )
 		g_fIsXash3D = TRUE;
 
+	Admin_RegisterCVars();
+
 	g_psv_gravity = CVAR_GET_POINTER( "sv_gravity" );
 	g_psv_aim = CVAR_GET_POINTER( "sv_aim" );
 	g_footsteps = CVAR_GET_POINTER( "mp_footsteps" );
@@ -491,6 +500,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &explosionfix );
 	CVAR_REGISTER( &monsteryawspeedfix );
 	CVAR_REGISTER( &corpsephysics );
+	CVAR_REGISTER( &pushablemode );
 	CVAR_REGISTER( &forcerespawn );
 	CVAR_REGISTER( &flashlight );
 	CVAR_REGISTER( &aimcrosshair );
@@ -504,7 +514,10 @@ void GameDLLInit( void )
 
 	CVAR_REGISTER( &mp_chattime );
 
-
+	CVAR_REGISTER( &mp_anticheat );
+	CVAR_REGISTER( &mp_flying_crowbar );
+	CVAR_REGISTER( &mp_clock );
+	CVAR_REGISTER( &mp_allowdrop );
 
 // REGISTER CVARS FOR SKILL LEVEL STUFF
 	// Agrunt
@@ -883,4 +896,3 @@ void GameDLLInit( void )
 
 	SERVER_COMMAND( "exec skill.cfg\n" );
 }
-

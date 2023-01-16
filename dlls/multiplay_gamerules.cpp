@@ -227,6 +227,8 @@ void CHalfLifeMultiplay::Think( void )
 		return;
 	}
 
+	m_Timer.Think();
+
 	float flTimeLimit = timelimit.value * 60;
 	float flFragLimit = fraglimit.value;
 

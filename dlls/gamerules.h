@@ -19,6 +19,7 @@
 #if !defined(GAMERULES_H)
 #define GAMERULES_H
 //#include "weapons.h"
+#include "agtimer.h"
 //#include "items.h"
 class CBasePlayerItem;
 class CBasePlayer;
@@ -162,6 +163,9 @@ public:
 
 	// Immediately end a multiplayer game
 	virtual void EndMultiplayerGame( void ) {}
+
+	// MiniAG Timer
+	AgTimer	m_Timer;
 };
 
 extern CGameRules *InstallGameRules( void );
