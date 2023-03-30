@@ -363,6 +363,7 @@ int CCrowbar::Swing( int fFirst )
 // BMOD Begin - Flying Crowbar
 void CCrowbar::SecondaryAttack()
 {
+#if !CLIENT_DLL
 	if ( !mp_flying_crowbar.value )
 		return;
 
@@ -409,6 +410,7 @@ void CCrowbar::SecondaryAttack()
 		// They no longer have an active item.
 		m_pPlayer->m_pActiveItem = NULL;
 	}
+#endif
 }
 // BMOD End - Flying Crowbar
 #if CROWBAR_IDLE_ANIM
