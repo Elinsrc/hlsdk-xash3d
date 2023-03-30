@@ -43,7 +43,7 @@ option(USE_VGUI2 "Enable VGUI2. UNDONE" OFF)
 option(USE_NOVGUI_MOTD "Prefer non-VGUI MOTD when USE_VGUI is enabled" OFF)
 option(USE_NOVGUI_SCOREBOARD "Prefer non-VGUI Scoreboard when USE_VGUI is enabled" OFF)
 option(USE_VOICEMGR "Enable VOICE MANAGER." OFF)
-option(BUILD_CLIENT "Build client dll" OFF)
+option(BUILD_CLIENT "Build client dll" ON)
 option(BUILD_SERVER "Build server dll" ON)
 
 if (CMAKE_SIZEOF_VOID_P EQUAL 4 OR
@@ -184,6 +184,10 @@ if(NOT MSVC)
 	add_compile_options(-Wreturn-type) # GCC/Clang flag
 else()
 	add_definitions(-D_CRT_SILENCE_NONCONFORMING_TGMATH_H)
+endif()
+
+if(VITA)
+	add_compile_options(-fno-use-cxa-atexit)
 endif()
 
 check_include_file("tgmath.h" HAVE_TGMATH_H)

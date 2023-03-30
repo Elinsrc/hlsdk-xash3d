@@ -74,8 +74,10 @@ def configure(conf):
 	conf.load('msvs msdev strip_on_install')
 
 	if conf.env.DEST_OS == 'android':
-		conf.options.GOLDSRC = False
+		conf.options.GOLDSRC = conf.env.GOLDSRC = False
 		conf.env.SERVER_NAME = 'server' # can't be any other name, until specified
+	elif conf.env.DEST_OS in ['nswitch', 'psvita']:
+		conf.options.GOLDSRC = conf.env.GOLDSRC = False
 	
 	if conf.env.MAGX:
 		enforce_pic = False
@@ -147,6 +149,20 @@ def configure(conf):
 
 		cflags += conf.filter_cflags(compiler_optional_flags + c_compiler_optional_flags, cflags)
 		cxxflags += conf.filter_cxxflags(compiler_optional_flags, cflags)
+
+	# on the Switch and the PSVita, allow undefined symbols by default,
+	# which is needed for the dynamic loaders to work
+	# additionally, shared libs are linked without libc
+	if conf.env.DEST_OS == 'nswitch':
+		linkflags.remove('-Wl,--no-undefined')
+		conf.env.append_unique('LINKFLAGS_cshlib', ['-nostdlib', '-nostartfiles'])
+		conf.env.append_unique('LINKFLAGS_cxxshlib', ['-nostdlib', '-nostartfiles'])
+	elif conf.env.DEST_OS == 'psvita':
+		linkflags.remove('-Wl,--no-undefined')
+		conf.env.append_unique('CFLAGS_cshlib', ['-fPIC'])
+		conf.env.append_unique('CXXFLAGS_cxxshlib', ['-fPIC', '-fno-use-cxa-atexit'])
+		conf.env.append_unique('LINKFLAGS_cshlib', ['-nostdlib', '-Wl,--unresolved-symbols=ignore-all'])
+		conf.env.append_unique('LINKFLAGS_cxxshlib', ['-nostdlib', '-Wl,--unresolved-symbols=ignore-all'])
 
 	conf.env.append_unique('CFLAGS', cflags)
 	conf.env.append_unique('CXXFLAGS', cxxflags)
