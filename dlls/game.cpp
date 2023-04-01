@@ -59,7 +59,7 @@ cvar_t mp_anticheat = { "mp_anticheat", "1", FCVAR_SERVER };
 cvar_t mp_flying_crowbar = { "mp_flying_crowbar", "1", FCVAR_SERVER };
 cvar_t mp_clock = { "mp_clock", "1", FCVAR_SERVER };
 cvar_t mp_allowdrop = { "mp_allowdrop", "1", FCVAR_SERVER };
-cvar_t mp_dmg_messages { "mp_dmg_messages", "1", FCVAR_SERVER };
+cvar_t mp_dmg_messages = { "mp_dmg_messages", "1", FCVAR_SERVER };
 
 // Engine Cvars
 cvar_t *g_psv_gravity = NULL;
