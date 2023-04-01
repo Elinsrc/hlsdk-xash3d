@@ -23,9 +23,11 @@
 #include "gamerules.h"
 #include "game.h"
 
+#if !CLIENT_DLL
 // BMOD Begin - Flying Crowbar
 #include "BMOD_flyingcrowbar.h"
 // BMOD End - Flying Crowbar
+#endif
 
 #define	CROWBAR_BODYHIT_VOLUME 128
 #define	CROWBAR_WALLHIT_VOLUME 512

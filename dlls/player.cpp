@@ -37,6 +37,10 @@
 #include "pm_shared.h"
 #include "hltv.h"
 
+#include "addition.h"
+
+extern cvar_t mp_dmg_messages;
+
 // #define DUCKFIX
 
 extern DLL_GLOBAL ULONG g_ulModelIndexPlayer;
@@ -462,15 +466,17 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 		return 0;
 	}
 
+
+	float flArmor = 0;
+	float flArmorDone = 0;
+
 	// keep track of amount of damage last sustained
 	m_lastDamageAmount = (int)flDamage;
 
-	// Armor. 
+	// Armor.
 	if( !( pev->flags & FL_GODMODE ) && pev->armorvalue && !( bitsDamageType & ( DMG_FALL | DMG_DROWN ) ) )// armor doesn't protect against fall or drown damage!
 	{
 		float flNew = flDamage * flRatio;
-
-		float flArmor;
 
 		flArmor = ( flDamage - flNew ) * flBonus;
 
@@ -480,12 +486,44 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 			flArmor = pev->armorvalue;
 			flArmor *= ( 1 / flBonus );
 			flNew = flDamage - flArmor;
+			flArmorDone = pev->armorvalue;
 			pev->armorvalue = 0;
 		}
 		else
+		{
 			pev->armorvalue -= flArmor;
-
+			flArmorDone = flArmor;
+		}
 		flDamage = flNew;
+	}
+
+	char AttackerText[128];
+	char DefenderText[128];
+	char HitGroup[128] = "";
+
+	if( m_LastHitGroup == HITGROUP_HEAD )
+		strcpy( HitGroup, "HEADSHOT!" );
+
+	//bubble mod
+	if( mp_dmg_messages.value )
+	{
+		if( pAttacker == this )
+		{
+			sprintf( DefenderText, "Did %i/%i damage to yourself. %s\n", (int)flDamage, (int)flArmorDone, HitGroup );
+			ClientPrint( pev, HUD_PRINTNOTIFY, DefenderText );
+		}
+		else if( pAttacker->IsPlayer() )
+		{
+			sprintf( DefenderText, "Took %i/%i damage from %s. %s\n", (int)flDamage, (int)flArmorDone, STRING( pAttacker->pev->netname ), HitGroup );
+			sprintf( AttackerText, "Did %i/%i damage to %s. %s\n", (int)flDamage, (int)flArmorDone, STRING( pev->netname ), HitGroup );
+			ClientPrint( pev, HUD_PRINTNOTIFY, DefenderText );
+			ClientPrint( pAttacker->pev, HUD_PRINTNOTIFY, AttackerText );
+		}
+		else
+		{
+			sprintf( DefenderText, "Took %i/%i damage.\n", (int)flDamage, (int)flArmorDone );
+			ClientPrint( pev, HUD_PRINTNOTIFY, DefenderText );
+		}
 	}
 
 	// this cast to INT is critical!!! If a player ends up with 0.5 health, the engine will get that

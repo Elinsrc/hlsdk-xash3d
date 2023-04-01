@@ -111,7 +111,7 @@ void AgTimer::Think()
 				sprintf( szTime, "%ld\n", lTime );
 			}
 
-			Print( szTime, 60, 0.5, 0.01, 1 );
+			Print( szTime, 60, 0.5, 0.01, 10 );
 				m_fNextTimerUpdate += 1;
 		}
 	}

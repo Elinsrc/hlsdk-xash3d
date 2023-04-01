@@ -47,6 +47,7 @@ extern cvar_t mp_anticheat;
 extern cvar_t mp_flying_crowbar;
 extern cvar_t mp_clock;
 extern cvar_t mp_allowdrop;
+extern cvar_t mp_dmg_messages;
 
 // Engine Cvars
 extern cvar_t *g_psv_gravity;

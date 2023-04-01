@@ -35,8 +35,8 @@ cvar_t falldamage	= { "mp_falldamage","0", FCVAR_SERVER };
 cvar_t weaponstay	= { "mp_weaponstay","0", FCVAR_SERVER };
 cvar_t selfgauss	= { "selfgauss", "1", FCVAR_SERVER };
 cvar_t chargerfix	= { "chargerfix", "0", FCVAR_SERVER };
-cvar_t satchelfix	= { "satchelfix", "0", FCVAR_SERVER };
-cvar_t explosionfix	= { "explosionfix", "0", FCVAR_SERVER };
+cvar_t satchelfix	= { "satchelfix", "1", FCVAR_SERVER };
+cvar_t explosionfix	= { "explosionfix", "1", FCVAR_SERVER };
 cvar_t monsteryawspeedfix	= { "monsteryawspeedfix", "1", FCVAR_SERVER };
 cvar_t corpsephysics = { "corpsephysics", "0", FCVAR_SERVER };
 cvar_t pushablemode = { "pushablemode", "0", FCVAR_SERVER };
@@ -59,6 +59,7 @@ cvar_t mp_anticheat = { "mp_anticheat", "1", FCVAR_SERVER };
 cvar_t mp_flying_crowbar = { "mp_flying_crowbar", "1", FCVAR_SERVER };
 cvar_t mp_clock = { "mp_clock", "1", FCVAR_SERVER };
 cvar_t mp_allowdrop = { "mp_allowdrop", "1", FCVAR_SERVER };
+cvar_t mp_dmg_messages { "mp_dmg_messages", "1", FCVAR_SERVER };
 
 // Engine Cvars
 cvar_t *g_psv_gravity = NULL;
@@ -518,6 +519,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &mp_flying_crowbar );
 	CVAR_REGISTER( &mp_clock );
 	CVAR_REGISTER( &mp_allowdrop );
+	CVAR_REGISTER( &mp_dmg_messages );
 
 // REGISTER CVARS FOR SKILL LEVEL STUFF
 	// Agrunt
