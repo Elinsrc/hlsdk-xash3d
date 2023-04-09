@@ -30,9 +30,11 @@ LOCAL_C_INCLUDES := $(SDL_PATH)/include \
 
 LOCAL_SRC_FILES := agrunt.cpp airtank.cpp \
            aflock.cpp \
+           agtimer.cpp \
            addition.cpp \
            admin.cpp \
            BMOD_flyingcrowbar.cpp \
+           boombox.cpp \
            animating.cpp \
            animation.cpp \
            apache.cpp \
@@ -50,6 +52,7 @@ LOCAL_SRC_FILES := agrunt.cpp airtank.cpp \
            crossbow.cpp \
            crowbar.cpp \
            defaultai.cpp \
+           displacer.cpp \
            doors.cpp \
            effects.cpp \
            egon.cpp \
@@ -109,6 +112,7 @@ LOCAL_SRC_FILES := agrunt.cpp airtank.cpp \
            scientist.cpp \
            scripted.cpp \
            shotgun.cpp \
+           sniperrifle.cpp \
            singleplay_gamerules.cpp \
            skill.cpp \
            sound.cpp \
@@ -129,6 +133,8 @@ LOCAL_SRC_FILES := agrunt.cpp airtank.cpp \
            world.cpp \
            xen.cpp \
            zombie.cpp \
+           uzi.cpp \
+           knife.cpp \
 	   ../pm_shared/pm_debug.c \
 	   ../pm_shared/pm_math.c \
 	   ../pm_shared/pm_shared.c

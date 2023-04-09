@@ -28,6 +28,7 @@ def build(bld):
 	source += [
 		'addition.cpp',
 		'admin.cpp',
+		'agtimer.cpp',
 		'agrunt.cpp',
 		'airtank.cpp',
 		'aflock.cpp',
@@ -40,6 +41,7 @@ def build(bld):
 		'bigmomma.cpp',
 		'bloater.cpp',
 		'BMOD_flyingcrowbar.cpp',
+		'boombox.cpp',
 		'bmodels.cpp',
 		'bullsquid.cpp',
 		'buttons.cpp',
@@ -117,6 +119,7 @@ def build(bld):
 		'squadmonster.cpp',
 		'squeakgrenade.cpp',
 		'subs.cpp',
+		'sniperrifle.cpp',
 		'talkmonster.cpp',
 		'teamplay_gamerules.cpp',
 		'tempmonster.cpp',
@@ -128,7 +131,9 @@ def build(bld):
 		'weapons.cpp',
 		'world.cpp',
 		'xen.cpp',
-		'zombie.cpp'
+		'zombie.cpp',
+		'uzi.cpp',
+		'knife.cpp'
 	]
 
 	includes = [

@@ -256,6 +256,11 @@ bool Admin_ClientCommand( edict_t *pEntity )
 		pPlayer->GiveNamedItem( "weapon_satchel" );
 		pPlayer->GiveNamedItem( "weapon_snark" );
 		pPlayer->GiveNamedItem( "weapon_hornetgun" );
+		pPlayer->GiveNamedItem( "weapon_boombox");
+		pPlayer->GiveNamedItem( "weapon_uzi");
+		pPlayer->GiveNamedItem( "weapon_sniperrifle");
+		pPlayer->GiveNamedItem( "weapon_knife" );
+		pPlayer->GiveNamedItem( "weapon_displacer" );
 		gEvilImpulse101 = FALSE;
 		return true;
 	}

@@ -460,12 +460,13 @@ void CHalfLifeMultiplay::InitHUD( CBasePlayer *pl )
 
 	// sending just one score makes the hud scoreboard active;  otherwise
 	// it is just disabled for single play
-	MESSAGE_BEGIN( MSG_ONE, gmsgScoreInfo, NULL, pl->edict() );
+	//fix a bug in the information about the player's score when he left the server, so that his score would not be transferred to another player(seems to work)
+	MESSAGE_BEGIN( MSG_ALL, gmsgScoreInfo );
 		WRITE_BYTE( ENTINDEX(pl->edict()) );
+		WRITE_SHORT( (int)pl->pev->frags );
+		WRITE_SHORT( pl->m_iDeaths );
 		WRITE_SHORT( 0 );
-		WRITE_SHORT( 0 );
-		WRITE_SHORT( 0 );
-		WRITE_SHORT( 0 );
+		WRITE_SHORT( GetTeamIndex( pl->m_szTeamName ) + 1 );
 	MESSAGE_END();
 
 	SendMOTDToClient( pl->edict() );
@@ -526,6 +527,19 @@ void CHalfLifeMultiplay::ClientDisconnected( edict_t *pClient )
 			}
 
 			pPlayer->RemoveAllItems( TRUE );// destroy all of the players weapons and items
+
+			//fix a bug in the information about the player's score when he left the server, so that his score would not be transferred to another player(seems to work)
+			pPlayer->pev->frags = 0;
+			pPlayer->m_iDeaths = 0;
+
+			// update the scores
+			MESSAGE_BEGIN( MSG_ALL, gmsgScoreInfo );
+					WRITE_BYTE( ENTINDEX(pPlayer->edict()) );
+					WRITE_SHORT( (int)pPlayer->pev->frags );
+					WRITE_SHORT( pPlayer->m_iDeaths );
+					WRITE_SHORT( 0 );
+					WRITE_SHORT( 0 );
+			MESSAGE_END();
 		}
 	}
 }
@@ -598,9 +612,12 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 
 	if( addDefault )
 	{
+		pPlayer->GiveNamedItem( "weapon_boombox" );
 		pPlayer->GiveNamedItem( "weapon_crowbar" );
 		pPlayer->GiveNamedItem( "weapon_9mmhandgun" );
 		pPlayer->GiveAmmo( 68, "9mm", _9MM_MAX_CARRY );// 4 full reloads
+		pPlayer->GiveNamedItem( "weapon_uzi" );
+		pPlayer->GiveNamedItem( "weapon_knife" );
 	}
 
 	pPlayer->m_iAutoWepSwitch = iOldAutoWepSwitch;

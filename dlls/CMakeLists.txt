@@ -46,6 +46,7 @@ set (SVDLL_SOURCES
 	animation.cpp
 	apache.cpp
 	barnacle.cpp
+	boombox.cpp
 	barney.cpp
 	bigmomma.cpp
 	bloater.cpp
@@ -60,6 +61,7 @@ set (SVDLL_SOURCES
 	crossbow.cpp
 	crowbar.cpp
 	defaultai.cpp
+	displacer.cpp
 	doors.cpp
 	effects.cpp
 	egon.cpp
@@ -115,6 +117,7 @@ set (SVDLL_SOURCES
 	roach.cpp
 	rpg.cpp
 	satchel.cpp
+	sniperrifle.cpp
 	schedule.cpp
 	scientist.cpp
 	scripted.cpp
@@ -135,10 +138,12 @@ set (SVDLL_SOURCES
 	tripmine.cpp
 	turret.cpp
 	util.cpp
+	uzi.cpp
 	weapons.cpp
 	world.cpp
 	xen.cpp
 	zombie.cpp
+	knife.cpp
 	../pm_shared/pm_debug.c
 	../pm_shared/pm_math.c
 	../pm_shared/pm_shared.c

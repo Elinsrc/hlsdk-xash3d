@@ -355,6 +355,22 @@ void W_Precache( void )
 	// hornetgun
 	UTIL_PrecacheOtherWeapon( "weapon_hornetgun" );
 
+	// boombox
+	UTIL_PrecacheOtherWeapon( "weapon_boombox" );
+
+	// sniperrifle
+	UTIL_PrecacheOtherWeapon( "weapon_sniperrifle" );
+	UTIL_PrecacheOther( "ammo_762" );
+
+	// uzi
+	UTIL_PrecacheOtherWeapon( "weapon_uzi" );
+
+	// knife
+	UTIL_PrecacheOtherWeapon( "weapon_knife" );
+
+	// displacer
+	UTIL_PrecacheOtherWeapon( "weapon_displacer" );
+
 	if( g_pGameRules->IsDeathmatch() )
 	{
 		UTIL_PrecacheOther( "weaponbox" );// container for dropped deathmatch weapons
