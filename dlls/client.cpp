@@ -664,9 +664,13 @@ void ClientCommand( edict_t *pEntity )
 				WRITE_SHORT( 0 );
 		MESSAGE_END();
 
-		pPlayer->Spawn();
+		// player in spectator mode cannot respawn
+		if( !pPlayer->IsObserver() )
+		{
+			pPlayer->Spawn();
+			ClientPrint( pev, HUD_PRINTCENTER, "Your score has been reset!\n" );
+		}
 
-		ClientPrint( pev, HUD_PRINTCENTER, "Your score has been reset!\n" );
 		return;
 	}
 	else if( !Addition_ClientCommand( GetClassPtr( (CBasePlayer *)pev ), pcmd ))
