@@ -1838,8 +1838,8 @@ void CBaseTrigger::TeleportTouch( CBaseEntity *pOther )
 	edict_t	*pentTarget = NULL;
 
 	// Only teleport monsters or clients
-	/*if( !FBitSet( pevToucher->flags, FL_CLIENT | FL_MONSTER ) )
-		return;*/
+	if( !FBitSet( pevToucher->flags, FL_CLIENT | FL_MONSTER ) )
+		return;
 
 	if( !UTIL_IsMasterTriggered( m_sMaster, pOther ) )
 		return;
