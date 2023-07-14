@@ -89,6 +89,7 @@ set (CLDLL_SOURCES
 	GameStudioModelRenderer.cpp
 	geiger.cpp
 	health.cpp
+	hl_hudmode.cpp
 	hud.cpp
 	hud_msg.cpp
 	hud_redraw.cpp

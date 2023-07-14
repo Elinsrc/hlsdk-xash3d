@@ -36,6 +36,9 @@
 #include "scripted.h"
 #include "defaultai.h"
 
+// PS2HL - debug
+#include "ps2hl_dbg.h"
+
 /*
 classname "scripted_sequence"
 targetname "me" - there can be more than one with the same name, and they act in concert
@@ -145,6 +148,7 @@ void CCineMonster::Spawn( void )
 		m_interruptable = FALSE;
 	else
 		m_interruptable = TRUE;
+
 }
 
 //=========================================================

@@ -106,6 +106,10 @@ set (SVDLL_SOURCES
 	plats.cpp
 	player.cpp
 	playermonster.cpp
+	ps2hl_dbg.cpp
+	ps2hl_item_eyescanner.cpp
+	ps2hl_item_healthcharger.cpp
+	ps2hl_item_recharge.cpp
 	python.cpp
 	rat.cpp
 	roach.cpp

@@ -185,6 +185,9 @@ int gmsgTeamNames = 0;
 int gmsgStatusText = 0;
 int gmsgStatusValue = 0;
 
+// PS2HL
+int gmsgHudMode = 0;	// HUD mode
+
 void LinkUserMessages( void )
 {
 	// Already taken care of?
@@ -230,6 +233,9 @@ void LinkUserMessages( void )
 
 	gmsgStatusText = REG_USER_MSG( "StatusText", -1 );
 	gmsgStatusValue = REG_USER_MSG( "StatusValue", 3 );
+
+	// PS2HL
+	gmsgHudMode = REG_USER_MSG("HudMode", 1);		// HUD mode
 }
 
 LINK_ENTITY_TO_CLASS( player, CBasePlayer )
@@ -934,6 +940,21 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim )
 		speed = 0;
 		playerAnim = PLAYER_IDLE;
 	}
+
+	// PS2HL - HUD mode icon handler
+	MESSAGE_BEGIN(MSG_ONE, gmsgHudMode, NULL, pev);
+	if (!FBitSet(pev->flags, FL_DUCKING))
+	{
+		if (speed < 270.0f)
+			WRITE_BYTE(0);	// Idle/walk
+		else
+			WRITE_BYTE(1);	// Running
+	}
+	else
+	{
+		WRITE_BYTE(2);		// Crouching
+	}
+	MESSAGE_END();
 
 	switch( playerAnim )
 	{

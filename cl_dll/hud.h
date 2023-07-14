@@ -22,7 +22,7 @@
 #pragma once
 #if !defined(HUD_H)
 #define HUD_H
-#define RGB_YELLOWISH 0x00FFA000 //255,160,0
+#define RGB_YELLOWISH 0x009600FF //100,0,255
 #define RGB_REDISH 0x00FF1010 //255,160,0
 #define RGB_GREENISH 0x0000A000 //0,160,0
 
@@ -96,6 +96,30 @@ struct HUDLIST
 #include "voice_status.h" // base voice handling class
 #endif
 #include "hud_spectator.h"
+
+//-----------------------------------------------------
+// PS2HL - HUD mode icon
+//-----------------------------------------------------
+class CHudMode : public CHudBase
+{
+public:
+	int Init(void);
+	int VidInit(void);
+	int Draw(float flTime);
+	void Reset(void);
+	int MsgFunc_HudMode(const char *pszName, int iSize, void *pbuf);
+
+private:
+	HSPRITE m_hCrouch;
+	HSPRITE m_hWalk;
+	HSPRITE m_hRun;
+	wrect_t *m_prcCrouch;
+	wrect_t *m_prcWalk;
+	wrect_t *m_prcRun;
+
+	int m_iMode;
+
+};
 
 //
 //-----------------------------------------------------
@@ -603,6 +627,9 @@ public:
 	CHudAmmoSecondary	m_AmmoSecondary;
 	CHudTextMessage m_TextMessage;
 	CHudStatusIcons m_StatusIcons;
+
+	// PS2HL
+	CHudMode		m_HudMode;
 #if !USE_VGUI || USE_NOVGUI_SCOREBOARD
 	CHudScoreboard	m_Scoreboard;
 #endif

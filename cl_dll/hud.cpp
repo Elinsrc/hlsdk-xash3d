@@ -383,8 +383,8 @@ void CHud::Init( void )
 	m_pCvarDraw = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
 	cl_lw = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
 	cl_viewbob = CVAR_CREATE( "cl_viewbob", "0", FCVAR_ARCHIVE );
-	cl_rollangle = gEngfuncs.pfnRegisterVariable( "cl_rollangle", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
-	cl_rollspeed = gEngfuncs.pfnRegisterVariable( "cl_rollspeed", "200", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
+	cl_rollangle = gEngfuncs.pfnRegisterVariable( "cl_rollangle", "2", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
+	cl_rollspeed = gEngfuncs.pfnRegisterVariable( "cl_rollspeed", "300", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
 	m_pSpriteList = NULL;
 
 	// Clear any old HUD list
@@ -417,6 +417,9 @@ void CHud::Init( void )
 	m_AmmoSecondary.Init();
 	m_TextMessage.Init();
 	m_StatusIcons.Init();
+
+	// PS2HL
+	m_HudMode.Init();
 #if USE_VGUI
 	GetClientVoiceMgr()->Init(&g_VoiceStatusHelper, (vgui::Panel**)&gViewPort);
 #endif
@@ -606,6 +609,9 @@ void CHud::VidInit( void )
 	m_AmmoSecondary.VidInit();
 	m_TextMessage.VidInit();
 	m_StatusIcons.VidInit();
+
+	// PS2HL
+	m_HudMode.VidInit();
 #if USE_VGUI
 	GetClientVoiceMgr()->VidInit();
 #endif

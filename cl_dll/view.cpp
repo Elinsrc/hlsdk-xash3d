@@ -103,6 +103,8 @@ cvar_t	*cl_bob;
 cvar_t	*cl_bobup;
 cvar_t	*cl_waterdist;
 cvar_t	*cl_chasedist;
+cvar_t	*cl_weaponlag;
+cvar_t	*cl_weaponsway;
 
 // These cvars are not registered (so users can't cheat), so set the ->value field directly
 // Register these cvars in V_Init() if needed for easy tweaking
@@ -297,6 +299,73 @@ void V_CalcGunAngle( struct ref_params_s *pparams )
 
 	VectorCopy( viewent->angles, viewent->curstate.angles );
 	VectorCopy( viewent->angles, viewent->latched.prevangles );
+}
+
+//==========================
+// V_CalcViewModelLag
+//==========================
+void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, const Vector &original_angles )
+{
+	static Vector m_vecLastFacing;
+	Vector vOriginalOrigin = origin;
+	Vector vOriginalAngles = angles;
+
+	// Calculate our drift
+	Vector forward, right, up;
+
+	AngleVectors( angles, forward, right, up );
+
+	if( pparams->frametime != 0.0f )	// not in paused
+	{
+		Vector vDifference;
+
+		vDifference = forward - m_vecLastFacing;
+
+		float flSpeed = 2.5f;
+
+		// If we start to lag too far behind, we'll increase the "catch up" speed.
+		// Solves the problem with fast cl_yawspeed, m_yaw or joysticks rotating quickly.
+		// The old code would slam lastfacing with origin causing the viewmodel to pop to a new position
+		float flDiff = vDifference.Length();
+
+		if(( flDiff > cl_weaponlag->value ) && ( cl_weaponlag->value > 0.0f ))
+		{
+			float flScale = flDiff / cl_weaponlag->value;
+			flSpeed *= flScale;
+		}
+
+		// FIXME:  Needs to be predictable?
+		m_vecLastFacing = m_vecLastFacing + vDifference * ( flSpeed * pparams->frametime );
+		// Make sure it doesn't grow out of control!!!
+		m_vecLastFacing = m_vecLastFacing.Normalize();
+		origin = origin + (vDifference * -1.0f) * flSpeed;
+	}
+
+	AngleVectors( original_angles, forward, right, up );
+
+	float pitch = original_angles[PITCH];
+
+	if( pitch > 180.0f )
+	{
+		pitch -= 360.0f;
+	}
+	else if( pitch < -180.0f )
+	{
+		pitch += 360.0f;
+	}
+
+	if( cl_weaponlag->value <= 0.0f )
+	{
+		origin = vOriginalOrigin;
+		angles = vOriginalAngles;
+	}
+	else
+	{
+		// FIXME: These are the old settings that caused too many exposed polys on some models
+		origin = origin + forward * ( -pitch * 0.035f );
+		origin = origin + right * ( -pitch * 0.03f );
+		origin = origin + up * ( -pitch * 0.02f );
+	}
 }
 
 /*
@@ -591,6 +660,11 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 
 	for( i = 0; i < 3; i++ )
 	{
+		if (cl_weaponsway->value)
+		{
+			view->origin[i] += bob * 0.3f * pparams->right[i];
+			view->origin[i] += bob * 0.2f * pparams->up[i];
+		}
 		view->origin[i] += bob * 0.4f * pparams->forward[i];
 	}
 	view->origin[2] += bob;
@@ -626,6 +700,8 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 	{
 		view->origin[2] += 0.5f;
 	}
+
+	V_CalcViewModelLag( pparams, view->origin, view->angles, v_lastAngles );
 
 	// Add in the punchangle, if any
 	VectorAdd( pparams->viewangles, pparams->punchangle, pparams->viewangles );
@@ -1607,6 +1683,8 @@ void V_Init( void )
 	cl_bobup = gEngfuncs.pfnRegisterVariable( "cl_bobup","0.5", 0 );
 	cl_waterdist = gEngfuncs.pfnRegisterVariable( "cl_waterdist","4", 0 );
 	cl_chasedist = gEngfuncs.pfnRegisterVariable( "cl_chasedist","112", 0 );
+	cl_weaponlag = gEngfuncs.pfnRegisterVariable( "cl_weaponlag", "1", FCVAR_ARCHIVE );
+	cl_weaponsway = gEngfuncs.pfnRegisterVariable( "cl_weaponsway", "1", FCVAR_ARCHIVE );
 }
 
 //#define TRACE_TEST	1
