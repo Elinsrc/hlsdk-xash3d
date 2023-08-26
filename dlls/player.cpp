@@ -3528,7 +3528,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "weapon_satchel" );
 		GiveNamedItem( "weapon_snark" );
 		GiveNamedItem( "weapon_hornetgun" );
-		GiveNamedItem( "weapon_boombox");
+		//GiveNamedItem( "weapon_boombox");
 		GiveNamedItem( "weapon_uzi");
 		GiveNamedItem( "weapon_sniperrifle");
 		GiveNamedItem( "weapon_knife" );
@@ -4309,9 +4309,10 @@ Vector CBasePlayer::GetAutoaimVector( float flDelta )
 	}
 
 	// m_vecAutoAim = m_vecAutoAim * 0.99;
+	CBasePlayer *pPlayer = GetClassPtr( (CBasePlayer *)pev );
 
 	// Don't send across network if sv_aim is 0
-	if( g_psv_aim->value != 0 )
+	if( g_psv_aim->value != 0 || pPlayer->IsAdmin )
 	{
 		if( m_vecAutoAim.x != m_lastx || m_vecAutoAim.y != m_lasty )
 		{
@@ -4336,8 +4337,9 @@ Vector CBasePlayer::AutoaimDeflection( Vector &vecSrc, float flDist, float flDel
 	Vector bestdir;
 	edict_t *bestent;
 	TraceResult tr;
+	CBasePlayer *pPlayer = GetClassPtr( (CBasePlayer *)pev );
 
-	if( g_psv_aim->value == 0 )
+	if( !pPlayer->IsAdmin)
 	{
 		m_fOnTarget = FALSE;
 		return g_vecZero;
@@ -4503,7 +4505,7 @@ void CBasePlayer::DropPlayerItem( char *pszItemName )
 		// assume player wants to drop the active item.
 		// make the string null to make future operations in this function easier
 		pszItemName = NULL;
-	} 
+	}
 
 	CBasePlayerItem *pWeapon;
 	int i;
@@ -4516,10 +4518,10 @@ void CBasePlayer::DropPlayerItem( char *pszItemName )
 		{
 			if( pszItemName )
 			{
-				// try to match by name. 
+				// try to match by name.
 				if( !strcmp( pszItemName, STRING( pWeapon->pev->classname ) ) )
 				{
-					// match! 
+					// match!
 					break;
 				}
 			}
@@ -4533,17 +4535,17 @@ void CBasePlayer::DropPlayerItem( char *pszItemName )
 				}
 			}
 
-			pWeapon = pWeapon->m_pNext; 
+			pWeapon = pWeapon->m_pNext;
 		}
 
-		// if we land here with a valid pWeapon pointer, that's because we found the 
+		// if we land here with a valid pWeapon pointer, that's because we found the
 		// item we want to drop and hit a BREAK;  pWeapon is the item.
 		if( pWeapon )
 		{
 			if( !g_pGameRules->GetNextBestWeapon( this, pWeapon ) )
 				return; // can't drop the item they asked for, may be our last item or something we can't holster
 
-			UTIL_MakeVectors( pev->angles ); 
+			UTIL_MakeVectors( pev->angles );
 
 			pev->weapons &= ~( 1 << pWeapon->m_iId );// take item off hud
 
@@ -4552,7 +4554,7 @@ void CBasePlayer::DropPlayerItem( char *pszItemName )
 			pWeaponBox->pev->angles.z = 0;
 			pWeaponBox->PackWeapon( pWeapon );
 			pWeaponBox->pev->velocity = gpGlobals->v_forward * 300 + gpGlobals->v_forward * 100;
-			
+
 			// drop half of the ammo for this weapon.
 			int iAmmoIndex;
 
@@ -4565,13 +4567,13 @@ void CBasePlayer::DropPlayerItem( char *pszItemName )
 				{
 					// pack up all the ammo, this weapon is its own ammo type
 					pWeaponBox->PackAmmo( MAKE_STRING( pWeapon->pszAmmo1() ), m_rgAmmo[iAmmoIndex] );
-					m_rgAmmo[iAmmoIndex] = 0; 
+					m_rgAmmo[iAmmoIndex] = 0;
 				}
 				else
 				{
 					// pack half of the ammo
 					pWeaponBox->PackAmmo( MAKE_STRING( pWeapon->pszAmmo1() ), m_rgAmmo[iAmmoIndex] / 2 );
-					m_rgAmmo[iAmmoIndex] /= 2; 
+					m_rgAmmo[iAmmoIndex] /= 2;
 				}
 			}
 

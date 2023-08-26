@@ -46,7 +46,6 @@ set (SVDLL_SOURCES
 	animation.cpp
 	apache.cpp
 	barnacle.cpp
-	boombox.cpp
 	barney.cpp
 	bigmomma.cpp
 	bloater.cpp
@@ -111,6 +110,9 @@ set (SVDLL_SOURCES
 	plane.cpp
 	plats.cpp
 	player.cpp
+	ps2hl_dbg.cpp
+	ps2hl_item_healthcharger.cpp
+	ps2hl_item_recharge.cpp
 	playermonster.cpp
 	python.cpp
 	rat.cpp

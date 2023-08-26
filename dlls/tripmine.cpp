@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -106,7 +106,7 @@ void CTripmineGrenade::Spawn( void )
 	pev->sequence = TRIPMINE_WORLD;
 	ResetSequenceInfo();
 	pev->framerate = 0;
-	
+
 	UTIL_SetSize( pev, Vector( -8.0f, -8.0f, -8.0f ), Vector( 8.0f, 8.0f, 8.0f ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
@@ -217,7 +217,7 @@ void CTripmineGrenade::PowerupThink( void )
 		return;
 	}
 	// ALERT( at_console, "%d %.0f %.0f %0.f\n", pev->owner, m_pOwner->pev->origin.x, m_pOwner->pev->origin.y, m_pOwner->pev->origin.z );
- 
+
 	if( gpGlobals->time > m_flPowerUp )
 	{
 		// make solid
@@ -262,7 +262,32 @@ void CTripmineGrenade::MakeBeam( void )
 	m_pBeam->pev->spawnflags |= SF_BEAM_TEMPORARY;
 #endif
 	m_pBeam->PointEntInit( vecTmpEnd, entindex() );
-	m_pBeam->SetColor( 0, 214, 198 );
+
+	switch (RANDOM_LONG(0,6))
+	{
+		case 0:
+			m_pBeam->SetColor( 0, 255, 255 );
+			break;
+		case 1:
+			m_pBeam->SetColor( 255, 0, 255 );
+			break;
+		case 2:
+			m_pBeam->SetColor( 0, 255, 0 );
+			break;
+		case 3:
+			m_pBeam->SetColor( 255, 0, 0 );
+			break;
+		case 4:
+			m_pBeam->SetColor( 255, 255, 0 );
+			break;
+		case 5:
+			m_pBeam->SetColor( 0, 0, 255 );
+			break;
+		case 6:
+			m_pBeam->SetColor( 255, 255, 255 );
+			break;
+	}
+
 	m_pBeam->SetScrollRate( 255 );
 	m_pBeam->SetBrightness( 64 );
 }
@@ -279,7 +304,7 @@ void CTripmineGrenade::BeamBreakThink( void )
 
 	// ALERT( at_console, "%f : %f\n", tr.flFraction, m_flBeamLength );
 
-	// respawn detect. 
+	// respawn detect.
 	if( !m_pBeam )
 	{
 #if TRIPMINE_BEAM_DUPLICATION_FIX
@@ -319,7 +344,7 @@ void CTripmineGrenade::BeamBreakThink( void )
 	{
 		// a bit of a hack, but all CGrenade code passes pev->owner along to make sure the proper player gets credit for the kill
 		// so we have to restore pev->owner from pRealOwner, because an entity's tracelines don't strike it's pev->owner which meant
-		// that a player couldn't trigger his own tripmine. Now that the mine is exploding, it's safe the restore the owner so the 
+		// that a player couldn't trigger his own tripmine. Now that the mine is exploding, it's safe the restore the owner so the
 		// CGrenade code knows who the explosive really belongs to.
 		pev->owner = m_pRealOwner;
 		pev->health = 0;
@@ -398,7 +423,7 @@ void CTripmine::Spawn()
 	if( !g_pGameRules->IsDeathmatch() )
 #endif
 	{
-		UTIL_SetSize( pev, Vector( -16.0f, -16.0f, 0.0f ), Vector( 16.0f, 16.0f, 28.0f ) ); 
+		UTIL_SetSize( pev, Vector( -16.0f, -16.0f, 0.0f ), Vector( 16.0f, 16.0f, 28.0f ) );
 	}
 }
 
@@ -483,10 +508,10 @@ void CTripmine::PrimaryAttack( void )
 
 			// player "shoot" animation
 			m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
-			
+
 			if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )
 			{
-				// no more mines! 
+				// no more mines!
 				RetireWeapon();
 				return;
 			}
@@ -518,7 +543,7 @@ void CTripmine::WeaponIdle( void )
 	}
 	else
 	{
-		RetireWeapon(); 
+		RetireWeapon();
 		return;
 	}
 

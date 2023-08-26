@@ -21,11 +21,12 @@
 #include "nodes.h"
 #include "player.h"
 #include "game.h"
+#include "addition.h"
 
 #define SNIPERRIFLE_WEIGHT 10
 #define SNIPERRIFLE_MAX_CLIP 5
 #define SNIPERRIFLE_DEFAULT_GIVE 5
-#define _762_MAX_CARRY 15
+#define _762_MAX_CARRY 30
 #define AMMO_762BOX_GIVE 5
 
 class CSniperrifle : public CBasePlayerWeapon
@@ -109,6 +110,9 @@ int CSniperrifle::GetItemInfo(ItemInfo *p)
 
 BOOL CSniperrifle::Deploy( )
 {
+	PrintMsg(m_pPlayer, "\nWhen this weapon is in your hands, you get disguise!", 6, 0.000, 0.000, 0.25, -1,  0.875, 4, 255, 160, 0);
+	m_pPlayer->pev->rendermode = kRenderTransTexture;
+	m_pPlayer->pev->renderamt = 100;
 	return DefaultDeploy( "models/v_m40a1.mdl", "models/p_m40a1.mdl", SNIPER_DRAW, "bow", 0 );
 }
 
@@ -126,6 +130,9 @@ int CSniperrifle::AddToPlayer( CBasePlayer *pPlayer )
 
 void CSniperrifle::Holster( int skiplocal )
 {
+	m_pPlayer->pev->rendermode = kRenderNormal;
+	m_pPlayer->pev->renderamt = 0;
+
 	m_fInReload = FALSE;// cancel any reload in progress.
 	m_pPlayer->m_flNextAttack = gpGlobals->time + 1.0;
 	SendWeaponAnim( SNIPER_HOLSTER );

@@ -23,6 +23,7 @@
 #include "util.h"
 #include "cbase.h"
 #include "monsters.h"
+#include "ps2hl_dbg.h"
 
 #if !defined(ANIMATION_H)
 #include "animation.h"

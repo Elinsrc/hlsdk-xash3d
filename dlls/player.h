@@ -334,6 +334,8 @@ public:
 	bool IsAdmin;
 
 	float m_flCheckCvars;
+	Vector	m_vFreezeAngle;
+	float	m_flFreezeTime;
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025

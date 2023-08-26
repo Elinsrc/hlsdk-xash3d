@@ -78,7 +78,7 @@ public:
 #define WEAPON_TRIPMINE			13
 #define	WEAPON_SATCHEL			14
 #define	WEAPON_SNARK			15
-#define WEAPON_BOOMBOX			16
+//#define WEAPON_BOOMBOX			16
 #define WEAPON_SNIPERRIFLE 		17
 #define WEAPON_UZI				18
 #define WEAPON_KNIFE			19
@@ -89,7 +89,7 @@ public:
 
 #define WEAPON_SUIT				31	// ?????
 
-#define MAX_NORMAL_BATTERY	100
+#define MAX_NORMAL_BATTERY	200
 
 // weapon weight factors (for auto-switching)   (-1 = noswitch)
 #define CROWBAR_WEIGHT		0
@@ -108,7 +108,7 @@ public:
 #define TRIPMINE_WEIGHT		-10
 
 // weapon clip/carry ammo capacities
-#define URANIUM_MAX_CARRY		100
+#define URANIUM_MAX_CARRY		200
 #define	_9MM_MAX_CARRY			250
 #define _357_MAX_CARRY			36
 #define BUCKSHOT_MAX_CARRY		125
@@ -956,7 +956,7 @@ public:
 	{
 		//!!!BUGBUG - fix the model!
 		pev->absmin = pev->origin + Vector(-16, -16, -5);
-		pev->absmax = pev->origin + Vector(16, 16, 28); 
+		pev->absmax = pev->origin + Vector(16, 16, 28);
 	}
 
 	void PrimaryAttack( void );
@@ -965,7 +965,7 @@ public:
 	void WeaponIdle( void );
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if CLIENT_WEAPONS
 		return TRUE;
 #else

@@ -156,13 +156,13 @@ void CRecharge::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 	}
 
 	// charge the player
-	if( m_hActivator->pev->armorvalue < 100 )
+	if( m_hActivator->pev->armorvalue < 200 )
 	{
 		m_iJuice--;
 		m_hActivator->pev->armorvalue += 1;
 
-		if( m_hActivator->pev->armorvalue > 100 )
-			m_hActivator->pev->armorvalue = 100;
+		if( m_hActivator->pev->armorvalue > 200 )
+			m_hActivator->pev->armorvalue = 200;
 	}
 
 	// govern the rate of charge

@@ -22,6 +22,7 @@
 #include "nodes.h"
 #include "player.h"
 #include "gamerules.h"
+#include "addition.h"
 
 #if !CLIENT_DLL
 #define BOLT_AIR_VELOCITY	2000
@@ -315,6 +316,9 @@ int CCrossbow::GetItemInfo( ItemInfo *p )
 
 BOOL CCrossbow::Deploy()
 {
+	PrintMsg(m_pPlayer, "\nWhen this weapon is in your hands, you get disguise!", 6, 0.000, 0.000, 0.25, -1,  0.875, 4, 255, 160, 0);
+	m_pPlayer->pev->rendermode = kRenderTransTexture;
+	m_pPlayer->pev->renderamt = 100;
 	if( m_iClip )
 		return DefaultDeploy( "models/v_crossbow.mdl", "models/p_crossbow.mdl", CROSSBOW_DRAW1, "bow" );
 	return DefaultDeploy( "models/v_crossbow.mdl", "models/p_crossbow.mdl", CROSSBOW_DRAW2, "bow" );
@@ -322,6 +326,9 @@ BOOL CCrossbow::Deploy()
 
 void CCrossbow::Holster( int skiplocal /* = 0 */ )
 {
+	m_pPlayer->pev->rendermode = kRenderNormal;
+	m_pPlayer->pev->renderamt = 0;
+
 	m_fInReload = FALSE;// cancel any reload in progress.
 
 	if( m_fInZoom )
@@ -394,6 +401,27 @@ void CCrossbow::FireSniperBolt()
 		ApplyMultiDamage( pev, m_pPlayer->pev );
 	}
 #endif
+
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+		WRITE_BYTE( TE_BEAMPOINTS );
+		WRITE_COORD( vecSrc.x );
+		WRITE_COORD( vecSrc.y );
+		WRITE_COORD( vecSrc.z );
+		WRITE_COORD( tr.vecEndPos.x );
+		WRITE_COORD( tr.vecEndPos.y );
+		WRITE_COORD( tr.vecEndPos.z );
+		WRITE_SHORT( g_sModelIndexLaser ); // model
+		WRITE_BYTE( 0 ); // framestart?
+		WRITE_BYTE( 0 ); // framerate?
+		WRITE_BYTE( 1 ); // life
+		WRITE_BYTE( 2 ); // width
+		WRITE_BYTE( 0 ); // noise
+		WRITE_BYTE( 100 ); // r, g, b
+		WRITE_BYTE( 100 ); // r, g, b
+		WRITE_BYTE( 200 ); // r, g, b
+		WRITE_BYTE( 200 ); // brightness
+		WRITE_BYTE( 0 ); // speed?
+	MESSAGE_END();
 }
 
 void CCrossbow::FireBolt()

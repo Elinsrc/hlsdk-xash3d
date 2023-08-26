@@ -356,7 +356,7 @@ void W_Precache( void )
 	UTIL_PrecacheOtherWeapon( "weapon_hornetgun" );
 
 	// boombox
-	UTIL_PrecacheOtherWeapon( "weapon_boombox" );
+	//UTIL_PrecacheOtherWeapon( "weapon_boombox" );
 
 	// sniperrifle
 	UTIL_PrecacheOtherWeapon( "weapon_sniperrifle" );
@@ -381,7 +381,7 @@ void W_Precache( void )
 	g_sModelIndexSmoke = PRECACHE_MODEL( "sprites/steam1.spr" );// smoke
 	g_sModelIndexBubbles = PRECACHE_MODEL( "sprites/bubble.spr" );//bubbles
 	g_sModelIndexBloodSpray = PRECACHE_MODEL( "sprites/bloodspray.spr" ); // initial blood
-	g_sModelIndexBloodDrop = PRECACHE_MODEL( "sprites/blood.spr" ); // splattered blood 
+	g_sModelIndexBloodDrop = PRECACHE_MODEL( "sprites/blood.spr" ); // splattered blood
 
 	g_sModelIndexLaser = PRECACHE_MODEL( g_pModelNameLaser );
 	g_sModelIndexLaserDot = PRECACHE_MODEL( "sprites/laserdot.spr" );
@@ -1658,7 +1658,7 @@ TYPEDESCRIPTION CHgun::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CHgun, CBasePlayerWeapon )
 
-TYPEDESCRIPTION	CSatchel::m_SaveData[] = 
+TYPEDESCRIPTION	CSatchel::m_SaveData[] =
 {
 	DEFINE_FIELD( CSatchel, m_chargeReady, FIELD_INTEGER ),
 };

@@ -53,7 +53,11 @@ void Cuzi::Precache( void )
 	PRECACHE_MODEL("models/v_uzi.mdl");
 	PRECACHE_MODEL("models/w_uzi.mdl");
 	PRECACHE_MODEL("models/p_uzi.mdl");
-	
+
+	PRECACHE_SOUND("weapons/uzi_reload1.wav");
+	PRECACHE_SOUND("weapons/uzi_reload2.wav");
+	PRECACHE_SOUND("weapons/uzi_reload3.wav");
+
 	PRECACHE_SOUND ("weapons/uzi_fire.wav");
 }
 

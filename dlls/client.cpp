@@ -54,6 +54,7 @@ extern int gmsgScoreInfo;
 
 extern cvar_t allow_spectators;
 extern cvar_t multibyte_only;
+extern cvar_t mp_allowdrop;
 
 extern int g_teamplay;
 
@@ -560,12 +561,12 @@ void ClientCommand( edict_t *pEntity )
 	}
 	else if( FStrEq( pcmd, "drop" ) )
 	{
+		CBasePlayer *pPlayer = GetClassPtr( (CBasePlayer *)pev );
 
-		if ( !mp_allowdrop.value )
-			return ClientPrint( pev, HUD_PRINTCENTER, "Drop is disabled!\n" );
-
-		// player is dropping an item. 
-		GetClassPtr( (CBasePlayer *)pev )->DropPlayerItem( (char *)CMD_ARGV( 1 ) );
+		if( mp_allowdrop.value || pPlayer->IsAdmin)
+			pPlayer->DropPlayerItem( (char *)CMD_ARGV( 1 ) );
+		else
+			ClientPrint( pev, HUD_PRINTCENTER, "Drop is disabled!\n" );
 	}
 	else if( FStrEq( pcmd, "fov" ) )
 	{
@@ -602,8 +603,8 @@ void ClientCommand( edict_t *pEntity )
 				pPlayer->StartObserver( pev->origin, VARS( pentSpawnSpot )->angles );
 
 				// notify other clients of player switching to spectator mode
-				UTIL_ClientPrintAll( HUD_PRINTNOTIFY, UTIL_VarArgs( "%s switched to spectator mode\n",
-						( pev->netname && ( STRING( pev->netname ) )[0] != 0 ) ? STRING( pev->netname ) : "unconnected" ) );
+				if( !pPlayer->IsAdmin )
+					UTIL_ClientPrintAll( HUD_PRINTNOTIFY, UTIL_VarArgs( "%s switched to spectator mode\n", ( pev->netname && ( STRING( pev->netname ) )[0] != 0 ) ? STRING( pev->netname ) : "unconnected" ) );
 			}
 			else
 				ClientPrint( pev, HUD_PRINTCENTER, "Spectator mode is disabled!\n" );
@@ -613,8 +614,8 @@ void ClientCommand( edict_t *pEntity )
 			pPlayer->StopObserver();
 
 			// notify other clients of player left spectators
-			UTIL_ClientPrintAll( HUD_PRINTNOTIFY, UTIL_VarArgs( "%s has left spectator mode\n",
-					( pev->netname && ( STRING( pev->netname ) )[0] != 0 ) ? STRING( pev->netname ) : "unconnected" ) );
+			if( !pPlayer->IsAdmin )
+				UTIL_ClientPrintAll( HUD_PRINTNOTIFY, UTIL_VarArgs( "%s has left spectator mode\n", ( pev->netname && ( STRING( pev->netname ) )[0] != 0 ) ? STRING( pev->netname ) : "unconnected" ) );
 		}
 	}
 	else if( FStrEq( pcmd, "specmode" ) ) // new spectator mode

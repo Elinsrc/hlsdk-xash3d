@@ -125,7 +125,7 @@ void CRpgRocket::Spawn( void )
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL( ENT( pev ), "models/rpgrocket.mdl" );
+	SET_MODEL( ENT( pev ), "models/nyancat.mdl" );
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
@@ -156,7 +156,7 @@ void CRpgRocket::RocketTouch( CBaseEntity *pOther )
 		pLauncher->m_cActiveRockets--;
 	}
 
-	STOP_SOUND( edict(), CHAN_VOICE, "weapons/rocket1.wav" );
+	STOP_SOUND( edict(), CHAN_VOICE, "weapons/nyancat.wav" );
 	ExplodeTouch( pOther );
 }
 
@@ -164,9 +164,9 @@ void CRpgRocket::RocketTouch( CBaseEntity *pOther )
 //=========================================================
 void CRpgRocket::Precache( void )
 {
-	PRECACHE_MODEL( "models/rpgrocket.mdl" );
-	m_iTrail = PRECACHE_MODEL( "sprites/smoke.spr" );
-	PRECACHE_SOUND( "weapons/rocket1.wav" );
+	PRECACHE_MODEL( "models/nyancat.mdl" );
+	m_iTrail = PRECACHE_MODEL( "sprites/rainbow.spr" );
+	PRECACHE_SOUND( "weapons/nyancat.wav" );
 }
 
 void CRpgRocket::IgniteThink( void )
@@ -174,10 +174,10 @@ void CRpgRocket::IgniteThink( void )
 	// pev->movetype = MOVETYPE_TOSS;
 
 	pev->movetype = MOVETYPE_FLY;
-	pev->effects |= EF_LIGHT;
+	//pev->effects |= EF_LIGHT;
 
 	// make rocket sound
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/rocket1.wav", 1, 0.5f );
+	EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/nyancat.wav", 1, 0.5f );
 
 	// rocket trail
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
@@ -260,7 +260,7 @@ void CRpgRocket::FollowThink( void )
 		if( pev->effects & EF_LIGHT )
 		{
 			pev->effects = 0;
-			STOP_SOUND( ENT( pev ), CHAN_VOICE, "weapons/rocket1.wav" );
+			STOP_SOUND( ENT( pev ), CHAN_VOICE, "weapons/nyancat.wav" );
 		}
 		pev->velocity = pev->velocity * 0.2f + vecTarget * flSpeed * 0.798f;
 		if( pev->waterlevel == 0 && pev->velocity.Length() < 1500.0f )
@@ -357,7 +357,7 @@ void CRpg::Precache( void )
 	UTIL_PrecacheOther( "laser_spot" );
 	UTIL_PrecacheOther( "rpg_rocket" );
 
-	PRECACHE_SOUND( "weapons/rocketfire1.wav" );
+	PRECACHE_SOUND( "weapons/nyancat.wav" );
 	PRECACHE_SOUND( "weapons/glauncher.wav" ); // alternative fire sound
 
 	m_usRpg = PRECACHE_EVENT( 1, "events/rpg.sc" );

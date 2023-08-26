@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -77,7 +77,7 @@ int CHgun::AddToPlayer( CBasePlayer *pPlayer )
 #if !CLIENT_DLL
 		if( g_pGameRules->IsMultiplayer() )
 		{
-			// in multiplayer, all hivehands come full. 
+			// in multiplayer, all hivehands come full.
 			pPlayer->m_rgAmmo[PrimaryAmmoIndex()] = HORNET_MAX_CARRY;
 		}
 #endif
@@ -140,7 +140,7 @@ void CHgun::PrimaryAttack()
 	m_flRechargeTime = gpGlobals->time + 0.5f;
 #endif
 	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
-	
+
 	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
 
