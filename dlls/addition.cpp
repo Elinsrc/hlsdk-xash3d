@@ -188,3 +188,29 @@ void PrintMsg(CBasePlayer *player, char *sText, int fHoldTime, int fadeinTime, i
 
 	UTIL_HudMessage(player, hText, sText);
 }
+
+void PrintClientMsg(entvars_t *client, char *sText, int fHoldTime, int fadeinTime, int fadeoutTime, int fxTime, float x, float y, int iChannel, int r, int g, int b)
+{
+	char szText[256];
+	hudtextparms_t hText = {0};
+	hText.channel = iChannel;
+
+	hText.x = x;
+	hText.y = y;
+
+	hText.r1 = r;
+	hText.g1 = g;
+	hText.b1 = b;
+	hText.a1 = 0;
+
+	hText.r2 = hText.g2 = hText.b2 = 0;
+	hText.a2 = 0;
+
+	hText.holdTime = fHoldTime;
+
+	hText.fadeinTime = fadeinTime; //0.000
+	hText.fadeoutTime = fadeoutTime; //0.000
+	hText.fxTime = fxTime; //0.25
+
+	UTIL_HudMessagePlayer(client, hText, sText);
+}

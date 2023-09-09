@@ -499,30 +499,25 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 
 	char AttackerText[128];
 	char DefenderText[128];
-	char HitGroup[128] = "";
 
-	if( m_LastHitGroup == HITGROUP_HEAD )
-		strcpy( HitGroup, "HEADSHOT!" );
-
-	//bubble mod
 	if( mp_dmg_messages.value )
 	{
 		if( pAttacker == this )
 		{
-			sprintf( DefenderText, "Did %i/%i damage to yourself. %s\n", (int)flDamage, (int)flArmorDone, HitGroup );
-			ClientPrint( pev, HUD_PRINTNOTIFY, DefenderText );
+			sprintf( DefenderText, "You\n( %i Damage / %i Armor )\n", (int)flDamage, (int)flArmorDone );
+			PrintClientMsg(pev, DefenderText, 3, 0.000, 0.000, 0.25, -1, 0.6, 5, 255, 0, 0);
 		}
 		else if( pAttacker->IsPlayer() )
 		{
-			sprintf( DefenderText, "Took %i/%i damage from %s. %s\n", (int)flDamage, (int)flArmorDone, STRING( pAttacker->pev->netname ), HitGroup );
-			sprintf( AttackerText, "Did %i/%i damage to %s. %s\n", (int)flDamage, (int)flArmorDone, STRING( pev->netname ), HitGroup );
-			ClientPrint( pev, HUD_PRINTNOTIFY, DefenderText );
-			ClientPrint( pAttacker->pev, HUD_PRINTNOTIFY, AttackerText );
+			sprintf( DefenderText, "%s\n( %i Damage / %i Armor )\n", STRING( pAttacker->pev->netname ), (int)flDamage, (int)flArmorDone );
+			sprintf( AttackerText, "%s\n( %i Damage / %i Armor )\n", STRING( pev->netname ), (int)flDamage, (int)flArmorDone );
+			PrintClientMsg(pev, DefenderText, 3, 0.000, 0.000, 0.25, -1, 0.6, 5, 255, 0, 0);
+			PrintClientMsg(pAttacker->pev, AttackerText, 3, 0.000, 0.000, 0.25, -1, -0.6, 6, 0, 255, 0);
 		}
 		else
 		{
-			sprintf( DefenderText, "Took %i/%i damage.\n", (int)flDamage, (int)flArmorDone );
-			ClientPrint( pev, HUD_PRINTNOTIFY, DefenderText );
+			sprintf( DefenderText, "You\n( %i Damage / %i Armor )\n", (int)flDamage, (int)flArmorDone );
+			PrintClientMsg(pev, DefenderText, 3, 0.000, 0.000, 0.25, -1, 0.6, 5, 255, 0, 0);
 		}
 	}
 
