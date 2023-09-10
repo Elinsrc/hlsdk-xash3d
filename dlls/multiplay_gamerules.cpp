@@ -22,6 +22,7 @@
 #include	"player.h"
 #include	"weapons.h"
 #include	"gamerules.h"
+#include	"shake.h"
  
 #include	"skill.h"
 #include	"game.h"
@@ -460,12 +461,13 @@ void CHalfLifeMultiplay::InitHUD( CBasePlayer *pl )
 
 	// sending just one score makes the hud scoreboard active;  otherwise
 	// it is just disabled for single play
-	MESSAGE_BEGIN( MSG_ONE, gmsgScoreInfo, NULL, pl->edict() );
+	// fix a bug in the information about the player's score when he left the server, so that his score would not be transferred to another player(seems to work)
+	MESSAGE_BEGIN( MSG_ALL, gmsgScoreInfo );
 		WRITE_BYTE( ENTINDEX(pl->edict()) );
+		WRITE_SHORT( (int)pl->pev->frags );
+		WRITE_SHORT( pl->m_iDeaths );
 		WRITE_SHORT( 0 );
-		WRITE_SHORT( 0 );
-		WRITE_SHORT( 0 );
-		WRITE_SHORT( 0 );
+		WRITE_SHORT( GetTeamIndex( pl->m_szTeamName ) + 1 );
 	MESSAGE_END();
 
 	SendMOTDToClient( pl->edict() );
@@ -639,10 +641,10 @@ int CHalfLifeMultiplay::IPointsForKill( CBasePlayer *pAttacker, CBasePlayer *pKi
 //=========================================================
 void CHalfLifeMultiplay::PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller, entvars_t *pInflictor )
 {
+	int r, g, b;
 	DeathNotice( pVictim, pKiller, pInflictor );
 
 	pVictim->m_iDeaths += 1;
-
 	FireTargets( "game_playerdie", pVictim, pVictim, USE_TOGGLE, 0 );
 	CBasePlayer *peKiller = NULL;
 	CBaseEntity *ktmp = CBaseEntity::Instance( pKiller );
@@ -660,6 +662,23 @@ void CHalfLifeMultiplay::PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller,
 		pKiller->frags += IPointsForKill( peKiller, pVictim );
 
 		FireTargets( "game_playerkill", ktmp, ktmp, USE_TOGGLE, 0 );
+
+		if ( mp_fade_victim.value )
+		{
+			char color[3];
+			int a = UTIL_axtoi(strncpy( color, mp_fade_victim_color.string + 6, 2 ));
+
+			if( a )
+			{
+				int r = UTIL_axtoi( strncpy( color, mp_fade_victim_color.string, 2 ) );
+				int g = UTIL_axtoi( strncpy( color, mp_fade_victim_color.string + 2, 2 ) );
+				int b = UTIL_axtoi( strncpy( color, mp_fade_victim_color.string + 4, 2 ) );
+				UTIL_ScreenFade( ktmp, Vector( r, g, b ), 0.3, 0.3, a, FFADE_IN );
+			}
+		}
+
+		if ( mp_victim_sound.value )
+			CLIENT_COMMAND( ENT( pKiller), "play %s\n", mp_victim_sound_path.string );
 	}
 	else
 	{

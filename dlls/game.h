@@ -48,6 +48,11 @@ extern cvar_t mp_flying_crowbar;
 extern cvar_t mp_clock;
 extern cvar_t mp_allowdrop;
 extern cvar_t mp_dmg_messages;
+extern cvar_t mp_fade_victim;
+extern cvar_t mp_fade_victim_color;
+
+extern cvar_t mp_victim_sound;
+extern cvar_t mp_victim_sound_path;
 
 // Engine Cvars
 extern cvar_t *g_psv_gravity;

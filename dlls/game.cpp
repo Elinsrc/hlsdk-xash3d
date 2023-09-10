@@ -61,6 +61,11 @@ cvar_t mp_clock = { "mp_clock", "1", FCVAR_SERVER };
 cvar_t mp_allowdrop = { "mp_allowdrop", "1", FCVAR_SERVER };
 cvar_t mp_dmg_messages = { "mp_dmg_messages", "1", FCVAR_SERVER };
 
+cvar_t mp_fade_victim = { "mp_fade_victim", "1", FCVAR_SERVER };
+cvar_t mp_fade_victim_color = { "mp_fade_victim_color", "22FF00A2", FCVAR_SERVER };
+cvar_t mp_victim_sound = { "mp_victim_sound", "1", FCVAR_SERVER };
+cvar_t mp_victim_sound_path = { "mp_victim_sound_path", "buttons/bell1.wav", FCVAR_SERVER };
+
 // Engine Cvars
 cvar_t *g_psv_gravity = NULL;
 cvar_t *g_psv_aim = NULL;
@@ -520,6 +525,11 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &mp_clock );
 	CVAR_REGISTER( &mp_allowdrop );
 	CVAR_REGISTER( &mp_dmg_messages );
+	CVAR_REGISTER( &mp_fade_victim );
+	CVAR_REGISTER( &mp_fade_victim_color );
+
+	CVAR_REGISTER (&mp_victim_sound );
+	CVAR_REGISTER( &mp_victim_sound_path );
 
 // REGISTER CVARS FOR SKILL LEVEL STUFF
 	// Agrunt
