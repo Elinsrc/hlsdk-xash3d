@@ -109,4 +109,3 @@ jobs:
       with:
         name: hlsdk-${{ steps.extract_branch.outputs.branch }}-windows-vgui
         path: dist-vgui/${{ steps.extract_gamedir.outputs.gamedir }}
-
