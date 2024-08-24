@@ -53,6 +53,9 @@ extern int GetWeaponData( struct edict_s *player, struct weapon_data_s *info );
 extern void CmdStart( const edict_t *player, const struct usercmd_s *cmd, unsigned int random_seed );
 extern void CmdEnd ( const edict_t *player );
 
+extern void HLBridge_SayText( const char *line );
+extern void HLBridge_SayText_f( void );
+extern int HLBridge_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size );
 extern int ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size );
 
 extern int GetHullBounds( int hullnumber, float *mins, float *maxs );

@@ -1859,10 +1859,42 @@ ConnectionlessPacket
   size of the response_buffer, so you must zero it out if you choose not to respond.
 ================================
 */
+void HLBridge_SayText( const char *line )
+{
+	char text[254] = {};
+
+	snprintf( text, sizeof( text ), "%s\n", line );
+
+	MESSAGE_BEGIN( MSG_ALL, gmsgSayText, NULL );
+	WRITE_BYTE( ENTINDEX(0) );
+	WRITE_STRING( text );
+	MESSAGE_END();
+}
+
+void HLBridge_SayText_f( void )
+{
+	HLBridge_SayText(CMD_ARGS());
+}
+
+int HLBridge_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size )
+{
+	int pszBridgeLengths = strlen(CVAR_GET_STRING( "connectionless_args" )) + 1;
+
+	if( !strncmp( args, UTIL_VarArgs( "%s ", CVAR_GET_STRING( "connectionless_args" )),  pszBridgeLengths ) )
+	{
+		HLBridge_SayText( args + pszBridgeLengths);
+		*response_buffer_size = 0;
+		return 1;
+	}
+	return 0;
+}
+
 int ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size )
 {
 	// Parse stuff from args
 	//int max_buffer_size = *response_buffer_size;
+	if(allow_connectionless.value && HLBridge_ConnectionlessPacket( net_from, args, response_buffer, response_buffer_size ))
+		return 1;
 
 	// Zero it out since we aren't going to respond.
 	// If we wanted to response, we'd write data into response_buffer

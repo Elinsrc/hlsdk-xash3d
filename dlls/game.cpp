@@ -51,10 +51,13 @@ cvar_t defaultteam	= { "mp_defaultteam","0" };
 cvar_t allowmonsters	= { "mp_allowmonsters","0", FCVAR_SERVER };
 cvar_t bhopcap		= { "mp_bhopcap", "1", FCVAR_SERVER };
 
-cvar_t allow_spectators = { "allow_spectators", "0", FCVAR_SERVER };	// 0 prevents players from being spectators
+cvar_t allow_spectators = { "allow_spectators", "1", FCVAR_SERVER };	// 0 prevents players from being spectators
 cvar_t multibyte_only = { "mp_multibyte_only", "0", FCVAR_SERVER };
 
 cvar_t mp_chattime	= { "mp_chattime","10", FCVAR_SERVER };
+
+cvar_t allow_connectionless = { "allow_connectionless","0", FCVAR_SERVER };
+cvar_t connectionless_args	= { "connectionless_args","", FCVAR_SERVER };
 
 // Engine Cvars
 cvar_t *g_psv_gravity = NULL;
@@ -510,6 +513,9 @@ void GameDLLInit( void )
 
 	CVAR_REGISTER( &mp_chattime );
 	CVAR_REGISTER( &sv_busters );
+
+	CVAR_REGISTER( &allow_connectionless );
+	CVAR_REGISTER( &connectionless_args );
 
 
 // REGISTER CVARS FOR SKILL LEVEL STUFF
