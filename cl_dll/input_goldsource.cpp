@@ -23,13 +23,10 @@
 #include "keydefs.h"
 #include "view.h"
 
-#if !_WIN32
-#define USE_SDL2	1
-#endif
-
-#if USE_SDL2
+#if !XASH_WIN32
 #define ARRAYSIZE(p)		( sizeof(p) /sizeof(p[0]) )
 #include <dlfcn.h>
+#endif
 #include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_gamecontroller.h>
 int (*pfnSDL_SetRelativeMouseMode)(SDL_bool);
@@ -112,9 +109,8 @@ static SDLFunction sdlFunctions[] = {
 	{(void**)&pfnSDL_JoystickUpdate, "SDL_JoystickUpdate"},
 	{(void**)&pfnSDL_GameControllerName, "SDL_GameControllerName"}
 };
-#endif
 
-#if _WIN32
+#if XASH_WIN32
 #include <process.h>
 #else
 typedef unsigned int DWORD;
@@ -149,7 +145,7 @@ extern cvar_t *cl_forwardspeed;
 extern cvar_t *cl_pitchspeed;
 extern cvar_t *cl_movespeedkey;
 
-#if _WIN32
+#if XASH_WIN32
 static cvar_t* m_rawinput = NULL;
 static double s_flRawInputUpdateTime = 0.0f;
 static bool m_bRawInput = false;
@@ -157,7 +153,15 @@ static bool m_bMouseThread = false;
 bool isMouseRelative = false;
 #endif
 
-#if _WIN32
+static void IN_SetMouseRelative(bool enable)
+{
+	safe_pfnSDL_SetRelativeMouseMode(enable ? SDL_TRUE : SDL_FALSE);
+#if XASH_WIN32
+	isMouseRelative = enable;
+#endif
+}
+
+#if XASH_WIN32
 #include "progdefs.h"
 #endif
 
@@ -184,7 +188,7 @@ static cvar_t *m_customaccel_max;
 //Mouse move is raised to this power before being scaled by scale factor
 static cvar_t *m_customaccel_exponent;
 
-#if _WIN32
+#if XASH_WIN32
 // if threaded mouse is enabled then the time to sleep between polls
 static cvar_t *m_mousethread_sleep;
 #endif
@@ -218,7 +222,7 @@ enum _ControlList
 	AxisTurn
 };
 
-#if !USE_SDL2 && _WIN32
+#if XASH_WIN32
 DWORD dwAxisFlags[JOY_MAX_AXES] =
 {
 	JOY_RETURNX,
@@ -232,19 +236,19 @@ DWORD dwAxisFlags[JOY_MAX_AXES] =
 
 DWORD   dwAxisMap[ JOY_MAX_AXES ];
 DWORD   dwControlMap[ JOY_MAX_AXES ];
-#if USE_SDL2
 int pdwRawValue[ JOY_MAX_AXES ];
-#elif _WIN32
-PDWORD pdwRawValue[ JOY_MAX_AXES ];
+#if XASH_WIN32
+PDWORD pdwRawValue_windows[ JOY_MAX_AXES ];
 #endif
+
 DWORD joy_oldbuttonstate, joy_oldpovstate;
 
 int joy_id;
 DWORD joy_numbuttons;
 
-#if USE_SDL2
 SDL_GameController *s_pJoystick = NULL;
-#elif _WIN32
+
+#if XASH_WIN32
 DWORD		joy_flags;
 static JOYINFOEX	ji;
 #endif
@@ -276,7 +280,7 @@ cvar_t  *joy_wwhack2;
 
 int joy_avail, joy_advancedinit, joy_haspov;
 
-#if _WIN32
+#if XASH_WIN32
 unsigned int s_hMouseThreadId = 0;
 HANDLE s_hMouseThread = 0;
 HANDLE s_hMouseQuitEvent = 0;
@@ -300,7 +304,7 @@ void Force_CenterView_f (void)
 	}
 }
 
-#if _WIN32
+#if XASH_WIN32
 
 LONG mouseThreadActive = 0;
 LONG mouseThreadCenterX = 0;
@@ -382,39 +386,33 @@ void IN_SetMouseMode(bool enable)
 
 	if(enable)
 	{
-#if _WIN32
+#if XASH_WIN32
 		if (mouseparmsvalid)
 			restore_spi = SystemParametersInfo (SPI_SETMOUSE, 0, newmouseparms, 0);
 
 		m_bRawInput = m_rawinput && m_rawinput->value != 0;
 		if(m_bRawInput)
 		{
-#if USE_SDL2
-			safe_pfnSDL_SetRelativeMouseMode(SDL_TRUE);
-#endif
-			isMouseRelative = true;
+			IN_SetMouseRelative(true);
 		}
 #else
-		safe_pfnSDL_SetRelativeMouseMode(SDL_TRUE);
+		IN_SetMouseRelative(true);
 #endif
 
 		currentMouseMode = true;
 	}
 	else
 	{
-#if _WIN32
+#if XASH_WIN32
 		if(isMouseRelative)
 		{
-#if USE_SDL2
-			safe_pfnSDL_SetRelativeMouseMode(SDL_FALSE);
-#endif
-			isMouseRelative = false;
+			IN_SetMouseRelative(false);
 		}
 
 		if (restore_spi)
 			SystemParametersInfo (SPI_SETMOUSE, 0, originalmouseparms, 0);
 #else
-		safe_pfnSDL_SetRelativeMouseMode(SDL_FALSE);
+		IN_SetMouseRelative(false);
 #endif
 
 		currentMouseMode = false;
@@ -423,7 +421,7 @@ void IN_SetMouseMode(bool enable)
 
 void IN_SetVisibleMouse(bool visible)
 {
-#if _WIN32
+#if XASH_WIN32
 	bool lockEntered = MouseThread_ActiveLock_Enter();
 #endif
 
@@ -431,13 +429,11 @@ void IN_SetVisibleMouse(bool visible)
 
 	IN_SetMouseMode(!visible);
 
-#if _WIN32
+#if XASH_WIN32
 	UpdateMouseThreadActive();
 	if(lockEntered) MouseThread_ActiveLock_Exit();
 #endif
 }
-
-void IN_ResetMouse( void );
 
 /*
 ===========
@@ -448,7 +444,7 @@ void GoldSourceInput::IN_ActivateMouse (void)
 {
 	if (mouseinitialized)
 	{
-#if _WIN32
+#if XASH_WIN32
 		bool lockEntered = MouseThread_ActiveLock_Enter();
 #endif
 
@@ -456,7 +452,7 @@ void GoldSourceInput::IN_ActivateMouse (void)
 
 		mouseactive = 1;
 
-#if _WIN32
+#if XASH_WIN32
 		UpdateMouseThreadActive();
 		if(lockEntered) MouseThread_ActiveLock_Exit();
 #endif
@@ -476,7 +472,7 @@ void GoldSourceInput::IN_DeactivateMouse (void)
 {
 	if (mouseinitialized)
 	{
-#if _WIN32
+#if XASH_WIN32
 		bool lockEntered = MouseThread_ActiveLock_Enter();
 #endif
 
@@ -484,7 +480,7 @@ void GoldSourceInput::IN_DeactivateMouse (void)
 
 		mouseactive = 0;
 
-#if _WIN32
+#if XASH_WIN32
 		UpdateMouseThreadActive();
 		if(lockEntered) MouseThread_ActiveLock_Exit();
 #endif
@@ -502,7 +498,7 @@ void GoldSourceInput::IN_StartupMouse (void)
 		return;
 
 	mouseinitialized = 1;
-#if _WIN32
+#if XASH_WIN32
 	mouseparmsvalid = SystemParametersInfo (SPI_GETMOUSE, 0, originalmouseparms, 0);
 
 	if (mouseparmsvalid)
@@ -537,7 +533,7 @@ void GoldSourceInput::IN_Shutdown (void)
 {
 	IN_DeactivateMouse ();
 
-#if _WIN32
+#if XASH_WIN32
 	if ( s_hMouseQuitEvent )
 	{
 		SetEvent( s_hMouseQuitEvent );
@@ -566,13 +562,15 @@ void GoldSourceInput::IN_Shutdown (void)
 	}
 #endif
 
-#if USE_SDL2
 	for (int j=0; j<ARRAYSIZE(sdlFunctions); ++j) {
 		*(sdlFunctions[j].ppfnFunc) = NULL;
 	}
+#if XASH_WIN32
+	FreeLibrary((HMODULE)sdl2Lib);
+#else
 	dlclose(sdl2Lib);
-	sdl2Lib = NULL;
 #endif
+	sdl2Lib = NULL;
 }
 
 /*
@@ -594,16 +592,17 @@ IN_ResetMouse
 FIXME: Call through to engine?
 ===========
 */
-void IN_ResetMouse( void )
+void GoldSourceInput::IN_ResetMouse( void )
 {
 	// no work to do in SDL
-#if _WIN32
+#if XASH_WIN32
 	// reset only if mouse is active and not in visible mode:
 	if(mouseactive && !iVisibleMouse && gEngfuncs.GetWindowCenterX && gEngfuncs.GetWindowCenterY)
 	{
 		if ( !m_bMouseThread && m_bRawInput )
 		{
-			SetCursorPos ( gEngfuncs.GetWindowCenterX(), gEngfuncs.GetWindowCenterY() );
+			if (!sdl2Lib)
+				SetCursorPos ( gEngfuncs.GetWindowCenterX(), gEngfuncs.GetWindowCenterY() );
 		}
 		else if ( !m_bRawInput )
 		{
@@ -712,7 +711,7 @@ void GoldSourceInput::IN_GetMouseDelta( int *pOutX, int *pOutY)
 	if(active)
 	{
 		int deltaX, deltaY;
-#if _WIN32
+#if XASH_WIN32
 		if ( !m_bRawInput )
 		{
 			if ( m_bMouseThread )
@@ -735,18 +734,21 @@ void GoldSourceInput::IN_GetMouseDelta( int *pOutX, int *pOutY)
 		else
 #endif
 		{
-#if USE_SDL2
-			safe_pfnSDL_GetRelativeMouseState( &deltaX, &deltaY );
-			current_pos.x = deltaX;
-			current_pos.y = deltaY;
-#else
-			GetCursorPos (&current_pos);
-			deltaX = current_pos.x - gEngfuncs.GetWindowCenterX();
-			deltaY = current_pos.y - gEngfuncs.GetWindowCenterY();
-#endif
+			if (sdl2Lib)
+			{
+				safe_pfnSDL_GetRelativeMouseState( &deltaX, &deltaY );
+				current_pos.x = deltaX;
+				current_pos.y = deltaY;
+			}
+			else
+			{
+				GetCursorPos (&current_pos);
+				deltaX = current_pos.x - gEngfuncs.GetWindowCenterX();
+				deltaY = current_pos.y - gEngfuncs.GetWindowCenterY();
+			}
 		}
 
-#if _WIN32
+#if XASH_WIN32
 		if ( !m_bRawInput )
 		{
 			if ( m_bMouseThread )
@@ -771,7 +773,7 @@ void GoldSourceInput::IN_GetMouseDelta( int *pOutX, int *pOutY)
 		my_accum = 0;
 
 		// reset mouse position if required, so there is room to move:
-#if _WIN32
+#if XASH_WIN32
 		// do not reset if mousethread would do it:
 		if ( m_bRawInput || !m_bMouseThread )
 #else
@@ -779,7 +781,7 @@ void GoldSourceInput::IN_GetMouseDelta( int *pOutX, int *pOutY)
 #endif
 			IN_ResetMouse();
 
-#if _WIN32
+#if XASH_WIN32
 		// update m_bRawInput occasionally:
 		const float currentTime = gEngfuncs.GetClientTime();
 		if ( currentTime  - s_flRawInputUpdateTime > 1.0f  || s_flRawInputUpdateTime == 0.0f )
@@ -792,17 +794,11 @@ void GoldSourceInput::IN_GetMouseDelta( int *pOutX, int *pOutY)
 
 			if(m_bRawInput && !isMouseRelative)
 			{
-#if USE_SDL2
-				safe_pfnSDL_SetRelativeMouseMode(SDL_TRUE);
-#endif
-				isMouseRelative = true;
+				IN_SetMouseRelative(true);
 			}
 			else if(!m_bRawInput && isMouseRelative)
 			{
-#if USE_SDL2
-				safe_pfnSDL_SetRelativeMouseMode(SDL_FALSE);
-#endif
-				isMouseRelative = false;
+				IN_SetMouseRelative(false);
 			}
 
 			UpdateMouseThreadActive();
@@ -815,6 +811,11 @@ void GoldSourceInput::IN_GetMouseDelta( int *pOutX, int *pOutY)
 		mx = my = 0;
 	}
 
+	if (ignoreNextDelta)
+	{
+		ignoreNextDelta = false;
+		mx = my = 0;
+	}
 	if(pOutX) *pOutX = mx;
 	if(pOutY) *pOutY = my;
 }
@@ -877,7 +878,12 @@ void GoldSourceInput::IN_MouseMove ( float frametime, usercmd_t *cmd)
 
 		if ( (in_mlook.state & 1) && !(in_strafe.state & 1))
 		{
-			viewangles[PITCH] += m_pitch->value * mouse_y;
+#if !USE_VGUI || USE_NOVGUI_MOTD
+			if( gHUD.m_MOTD.m_bShow )
+				gHUD.m_MOTD.scroll += m_pitch->value * mouse_y;
+			else
+#endif
+				viewangles[PITCH] += m_pitch->value * mouse_y;
 			if (viewangles[PITCH] > cl_pitchdown->value)
 				viewangles[PITCH] = cl_pitchdown->value;
 			if (viewangles[PITCH] < -cl_pitchup->value)
@@ -929,7 +935,7 @@ void GoldSourceInput::IN_Accumulate (void)
 	{
 		if (mouseactive)
 		{
-#if _WIN32
+#if XASH_WIN32
 			if ( !m_bRawInput )
 			{
 				if ( !m_bMouseThread )
@@ -943,21 +949,24 @@ void GoldSourceInput::IN_Accumulate (void)
 			else
 #endif
 			{
-#if USE_SDL2
-				int deltaX, deltaY;
-				safe_pfnSDL_GetRelativeMouseState( &deltaX, &deltaY );
-				mx_accum += deltaX;
-				my_accum += deltaY;
-#else
-				GetCursorPos (&current_pos);
+				if (sdl2Lib)
+				{
+					int deltaX, deltaY;
+					safe_pfnSDL_GetRelativeMouseState( &deltaX, &deltaY );
+					mx_accum += deltaX;
+					my_accum += deltaY;
+				}
+				else
+				{
+					GetCursorPos (&current_pos);
 
-				mx_accum += current_pos.x - gEngfuncs.GetWindowCenterX();
-				my_accum += current_pos.y - gEngfuncs.GetWindowCenterY();
-#endif
+					mx_accum += current_pos.x - gEngfuncs.GetWindowCenterX();
+					my_accum += current_pos.y - gEngfuncs.GetWindowCenterY();
+				}
 			}
 
 			// force the mouse to the center, so there's room to move
-#if _WIN32
+#if XASH_WIN32
 			// do not reset if mousethread would do it:
 			if ( m_bRawInput || !m_bMouseThread )
 #else
@@ -990,7 +999,7 @@ void GoldSourceInput::IN_ClearStates (void)
 IN_StartupJoystick
 ===============
 */
-void IN_StartupJoystick (void)
+void GoldSourceInput::IN_StartupJoystick (void)
 {
 	// abort startup if user requests no joystick
 	if ( gEngfuncs.CheckParm ("-nojoy", NULL ) )
@@ -998,39 +1007,42 @@ void IN_StartupJoystick (void)
 
 	// assume no joystick
 	joy_avail = 0;
-#if USE_SDL2
-	int nJoysticks = safe_pfnSDL_NumJoysticks();
-	if ( nJoysticks > 0 )
+	if (UseSDL2Joystick())
 	{
-		for ( int i = 0; i < nJoysticks; i++ )
+		int nJoysticks = safe_pfnSDL_NumJoysticks();
+		if ( nJoysticks > 0 )
 		{
-			if ( safe_pfnSDL_IsGameController( i ) )
+			for ( int i = 0; i < nJoysticks; i++ )
 			{
-				s_pJoystick = safe_pfnSDL_GameControllerOpen( i );
-				if ( s_pJoystick )
+				if ( safe_pfnSDL_IsGameController( i ) )
 				{
-					//save the joystick's number of buttons and POV status
-					joy_numbuttons = SDL_CONTROLLER_BUTTON_MAX;
-					joy_haspov = 0;
+					s_pJoystick = safe_pfnSDL_GameControllerOpen( i );
+					if ( s_pJoystick )
+					{
+						//save the joystick's number of buttons and POV status
+						joy_numbuttons = SDL_CONTROLLER_BUTTON_MAX;
+						joy_haspov = 0;
 
-					// old button and POV states default to no buttons pressed
-					joy_oldbuttonstate = joy_oldpovstate = 0;
+						// old button and POV states default to no buttons pressed
+						joy_oldbuttonstate = joy_oldpovstate = 0;
 
-					// mark the joystick as available and advanced initialization not completed
-					// this is needed as cvars are not available during initialization
-					gEngfuncs.Con_Printf ("joystick found\n\n", safe_pfnSDL_GameControllerName(s_pJoystick));
-					joy_avail = 1;
-					joy_advancedinit = 0;
-					break;
+						// mark the joystick as available and advanced initialization not completed
+						// this is needed as cvars are not available during initialization
+						gEngfuncs.Con_Printf ("joystick found\n\n", safe_pfnSDL_GameControllerName(s_pJoystick));
+						joy_avail = 1;
+						joy_advancedinit = 0;
+						break;
+					}
 				}
 			}
 		}
+		else
+		{
+			gEngfuncs.Con_DPrintf ("joystick not found -- driver not present\n\n");
+		}
+		return;
 	}
-	else
-	{
-		gEngfuncs.Con_DPrintf ("joystick not found -- driver not present\n\n");
-	}
-#elif _WIN32
+#if XASH_WIN32
 	int numdevs;
 	JOYCAPS jc;
 	MMRESULT mmr;
@@ -1085,7 +1097,6 @@ void IN_StartupJoystick (void)
 #endif
 }
 
-#if USE_SDL2
 int RawValuePointer (int axis)
 {
 	switch (axis)
@@ -1102,8 +1113,8 @@ int RawValuePointer (int axis)
 
 	}
 }
-#elif _WIN32
-PDWORD RawValuePointer (int axis)
+#if XASH_WIN32
+PDWORD RawValuePointer_windows(int axis)
 {
 	switch (axis)
 	{
@@ -1130,7 +1141,12 @@ PDWORD RawValuePointer (int axis)
 Joy_AdvancedUpdate_f
 ===========
 */
-void Joy_AdvancedUpdate_f (void)
+void Joy_AdvancedUpdate_f(void)
+{
+    CurrentMouseInput()->Joy_AdvancedUpdate();
+}
+
+void GoldSourceInput::Joy_AdvancedUpdate(void)
 {
 
 	// called once by IN_ReadJoystick and by user whenever an update is needed
@@ -1143,7 +1159,16 @@ void Joy_AdvancedUpdate_f (void)
 	{
 		dwAxisMap[i] = AxisNada;
 		dwControlMap[i] = JOY_ABSOLUTE_AXIS;
-		pdwRawValue[i] = RawValuePointer(i);
+		if (UseSDL2Joystick())
+		{
+			pdwRawValue[i] = RawValuePointer(i);
+		}
+#if XASH_WIN32
+		else
+		{
+			pdwRawValue_windows[i] = RawValuePointer_windows(i);
+		}
+#endif
 	}
 
 	if( joy_advanced->value == 0.0)
@@ -1185,19 +1210,26 @@ void Joy_AdvancedUpdate_f (void)
 		dwControlMap[JOY_AXIS_V] = dwTemp & JOY_RELATIVE_AXIS;
 	}
 
-#if !USE_SDL2 && _WIN32
-	// compute the axes to collect from DirectInput
-	joy_flags = JOY_RETURNCENTERED | JOY_RETURNBUTTONS | JOY_RETURNPOV;
-	for (i = 0; i < JOY_MAX_AXES; i++)
+#if XASH_WIN32
+	if (!UseSDL2Joystick())
 	{
-		if (dwAxisMap[i] != AxisNada)
+		// compute the axes to collect from DirectInput
+		joy_flags = JOY_RETURNCENTERED | JOY_RETURNBUTTONS | JOY_RETURNPOV;
+		for (i = 0; i < JOY_MAX_AXES; i++)
 		{
-			joy_flags |= dwAxisFlags[i];
+			if (dwAxisMap[i] != AxisNada)
+			{
+				joy_flags |= dwAxisFlags[i];
+			}
 		}
 	}
 #endif
 }
 
+bool GoldSourceInput::UseSDL2Joystick()
+{
+	return sdl2Lib != NULL;
+}
 
 /*
 ===========
@@ -1217,22 +1249,27 @@ void GoldSourceInput::IN_Commands (void)
 
 	// loop through the joystick buttons
 	// key a joystick event or auxillary event for higher number buttons for each state change
-#if USE_SDL2
-	buttonstate = 0;
-	for ( i = 0; i < SDL_CONTROLLER_BUTTON_MAX; i++ )
-	{
-		if ( safe_pfnSDL_GameControllerGetButton( s_pJoystick, (SDL_GameControllerButton)i ) )
-		{
-			buttonstate |= 1<<i;
-		}
-	}
+    if (UseSDL2Joystick())
+    {
+        buttonstate = 0;
+        for ( i = 0; i < SDL_CONTROLLER_BUTTON_MAX; i++ )
+        {
+            if ( safe_pfnSDL_GameControllerGetButton( s_pJoystick, (SDL_GameControllerButton)i ) )
+            {
+                buttonstate |= 1<<i;
+            }
+        }
 
-	for (i = 0; i < JOY_MAX_AXES; i++)
-	{
-		pdwRawValue[i] = RawValuePointer(i);
-	}
-#elif _WIN32
-	buttonstate = ji.dwButtons;
+        for (i = 0; i < JOY_MAX_AXES; i++)
+        {
+            pdwRawValue[i] = RawValuePointer(i);
+        }
+    }
+#if XASH_WIN32
+    else
+    {
+        buttonstate = ji.dwButtons;
+    }
 #endif
 
 	for (i=0 ; i < (int)joy_numbuttons ; i++)
@@ -1257,17 +1294,20 @@ void GoldSourceInput::IN_Commands (void)
 		// this avoids any potential problems related to moving from one
 		// direction to another without going through the center position
 		povstate = 0;
-#if !USE_SDL2 && _WIN32
-		if(ji.dwPOV != JOY_POVCENTERED)
+#if XASH_WIN32
+		if (!UseSDL2Joystick())
 		{
-			if (ji.dwPOV == JOY_POVFORWARD)
-				povstate |= 0x01;
-			if (ji.dwPOV == JOY_POVRIGHT)
-				povstate |= 0x02;
-			if (ji.dwPOV == JOY_POVBACKWARD)
-				povstate |= 0x04;
-			if (ji.dwPOV == JOY_POVLEFT)
-				povstate |= 0x08;
+			if(ji.dwPOV != JOY_POVCENTERED)
+			{
+				if (ji.dwPOV == JOY_POVFORWARD)
+					povstate |= 0x01;
+				if (ji.dwPOV == JOY_POVRIGHT)
+					povstate |= 0x02;
+				if (ji.dwPOV == JOY_POVBACKWARD)
+					povstate |= 0x04;
+				if (ji.dwPOV == JOY_POVLEFT)
+					povstate |= 0x08;
+			}
 		}
 #endif
 		// determine which bits have changed and key an auxillary event for each change
@@ -1293,12 +1333,14 @@ void GoldSourceInput::IN_Commands (void)
 IN_ReadJoystick
 ===============
 */
-int IN_ReadJoystick (void)
+int GoldSourceInput::IN_ReadJoystick (void)
 {
-#if USE_SDL2
-	safe_pfnSDL_JoystickUpdate();
-	return 1;
-#elif _WIN32
+    if (UseSDL2Joystick())
+    {
+        safe_pfnSDL_JoystickUpdate();
+        return 1;
+    }
+#if XASH_WIN32
 	memset (&ji, 0, sizeof(ji));
 	ji.dwSize = sizeof(ji);
 	ji.dwFlags = joy_flags;
@@ -1334,7 +1376,7 @@ int IN_ReadJoystick (void)
 IN_JoyMove
 ===========
 */
-void IN_JoyMove ( float frametime, usercmd_t *cmd )
+void GoldSourceInput::IN_JoyMove ( float frametime, usercmd_t *cmd )
 {
 	float   speed, aspeed;
 	float   fAxisValue, fTemp;
@@ -1348,7 +1390,7 @@ void IN_JoyMove ( float frametime, usercmd_t *cmd )
 	// this is needed as cvars are not available at initialization time
 	if( joy_advancedinit != 1 )
 	{
-		Joy_AdvancedUpdate_f();
+		Joy_AdvancedUpdate();
 		joy_advancedinit = 1;
 	}
 
@@ -1375,11 +1417,16 @@ void IN_JoyMove ( float frametime, usercmd_t *cmd )
 	for (i = 0; i < JOY_MAX_AXES; i++)
 	{
 		// get the floating point zero-centered, potentially-inverted data for the current axis
-#if USE_SDL2
-		fAxisValue = (float)pdwRawValue[i];
-#elif _WIN32
-		fAxisValue = (float) *pdwRawValue[i];
-		fAxisValue -= 32768.0;
+		if (UseSDL2Joystick())
+		{
+			fAxisValue = (float)pdwRawValue[i];
+		}
+#if XASH_WIN32
+		else
+		{
+			fAxisValue = (float) *pdwRawValue_windows[i];
+			fAxisValue -= 32768.0;
+		}
 #endif
 
 		if (joy_wwhack2->value != 0.0)
@@ -1543,6 +1590,7 @@ IN_Init
 */
 void GoldSourceInput::IN_Init (void)
 {
+	ignoreNextDelta = false;
 	m_filter				= gEngfuncs.pfnRegisterVariable ( "m_filter","0", FCVAR_ARCHIVE );
 	sensitivity			 = gEngfuncs.pfnRegisterVariable ( "sensitivity","3", FCVAR_ARCHIVE ); // user mouse sensitivity setting.
 
@@ -1571,7 +1619,8 @@ void GoldSourceInput::IN_Init (void)
 	m_customaccel_max		= gEngfuncs.pfnRegisterVariable ( "m_customaccel_max", "0", FCVAR_ARCHIVE );
 	m_customaccel_exponent	= gEngfuncs.pfnRegisterVariable ( "m_customaccel_exponent", "1", FCVAR_ARCHIVE );
 
-#if _WIN32
+
+#if XASH_WIN32
 	m_rawinput = gEngfuncs.pfnGetCvarPointer("m_rawinput");
 	m_bRawInput			 = m_rawinput && m_rawinput->value != 0;
 	m_bMouseThread		  = gEngfuncs.CheckParm ("-mousethread", NULL ) != NULL;
@@ -1602,29 +1651,50 @@ void GoldSourceInput::IN_Init (void)
 	}
 #endif
 
-#if USE_SDL2
-#if __APPLE__
+#if XASH_APPLE
 #define SDL2_FULL_LIBNAME "libsdl2-2.0.0.dylib"
+#elif XASH_WIN32
+#define SDL2_FULL_LIBNAME "SDL2.dll"
 #else
 #define SDL2_FULL_LIBNAME "libSDL2-2.0.so.0"
 #endif
+#if XASH_WIN32
+	sdl2Lib = LoadLibrary(SDL2_FULL_LIBNAME);
+#else
 	sdl2Lib = dlopen(SDL2_FULL_LIBNAME, RTLD_NOW|RTLD_LOCAL);
+#endif
 	if (sdl2Lib) {
 		for (int j=0; j<ARRAYSIZE(sdlFunctions); ++j) {
+#if XASH_WIN32
+			*(sdlFunctions[j].ppfnFunc) = GetProcAddress((HMODULE)sdl2Lib, sdlFunctions[j].name);
+#else
 			*(sdlFunctions[j].ppfnFunc) = dlsym(sdl2Lib, sdlFunctions[j].name);
+#endif
 			if (*sdlFunctions[j].ppfnFunc == NULL) {
+#if XASH_WIN32
+				gEngfuncs.Con_Printf("Could not load SDL2 function %s\n", sdlFunctions[j].name);
+#else
 				gEngfuncs.Con_Printf("Could not load SDL2 function %s: %s\n", sdlFunctions[j].name, dlerror());
+#endif
 			}
 		}
 	} else {
+#if XASH_WIN32
+		gEngfuncs.Con_Printf("Could not load SDL2\n");
+#else
 		gEngfuncs.Con_Printf("Could not load SDL2: %s\n", dlerror());
-	}
 #endif
+	}
 	gEngfuncs.pfnAddCommand ("force_centerview", Force_CenterView_f);
 	gEngfuncs.pfnAddCommand ("joyadvancedupdate", Joy_AdvancedUpdate_f);
 
 	IN_StartupMouse ();
 	IN_StartupJoystick ();
+}
+
+void GoldSourceInput::IgnoreNextMouseDelta()
+{
+	ignoreNextDelta = true;
 }
 
 #endif

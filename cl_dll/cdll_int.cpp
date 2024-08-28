@@ -28,7 +28,7 @@
 #include "vgui_TeamFortressViewport.h"
 #endif
 
-#if GOLDSOURCE_SUPPORT && (_WIN32 || __linux__ || __APPLE__) && (__i386 || _M_IX86)
+#if GOLDSOURCE_SUPPORT && (XASH_WIN32 || XASH_LINUX || XASH_APPLE) && XASH_X86
 #define USE_FAKE_VGUI	!USE_VGUI
 #if USE_FAKE_VGUI
 #include "VGUI_Panel.h"
@@ -42,6 +42,7 @@ extern "C"
 }
 
 #include <string.h>
+#include "vcs_info.h"
 
 cl_enginefunc_t gEngfuncs;
 CHud gHUD;
@@ -50,19 +51,9 @@ TeamFortressViewport *gViewPort = NULL;
 #endif
 mobile_engfuncs_t *gMobileEngfuncs = NULL;
 
-extern "C" int g_bhopcap;
 void InitInput( void );
 void EV_HookEvents( void );
 void IN_Commands( void );
-
-int __MsgFunc_Bhopcap( const char *pszName, int iSize, void *pbuf )
-{
-	BEGIN_READ( pbuf, iSize );
-
-	g_bhopcap = READ_BYTE();
-
-	return 1;
-}
 
 /*
 ========================== 
@@ -87,7 +78,7 @@ int		DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs );
 void	DLLEXPORT HUD_Frame( double time );
 void	DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking);
 void	DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf );
-void DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs );
+int DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs );
 }
 
 /*
@@ -180,6 +171,9 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	}
 
 	EV_HookEvents();
+
+	gEngfuncs.pfnRegisterVariable( "cl_game_build_commit", g_VCSInfo_Commit, 0 );
+	gEngfuncs.pfnRegisterVariable( "cl_game_build_branch", g_VCSInfo_Branch, 0 );
 
 	return 1;
 }
@@ -299,8 +293,6 @@ void DLLEXPORT HUD_Init( void )
 #if USE_VGUI
 	Scheme_Init();
 #endif
-
-	gEngfuncs.pfnHookUserMsg( "Bhopcap", __MsgFunc_Bhopcap );
 }
 
 /*
@@ -400,11 +392,12 @@ void DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf )
 	 gHUD.m_Spectator.DirectorMessage( iSize, pbuf );
 }
 
-void DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs )
+int DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs )
 {
 	if( gpMobileEngfuncs->version != MOBILITY_API_VERSION )
-		return;
+		return 1;
 	gMobileEngfuncs = gpMobileEngfuncs;
+	return 0;
 }
 
 bool HUD_MessageBox( const char *msg )

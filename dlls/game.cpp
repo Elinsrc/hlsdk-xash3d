@@ -17,8 +17,11 @@
 #include "util.h"
 #include "game.h"
 #include "admin.h"
+#include "vcs_info.h"
 
-BOOL		g_fIsXash3D;
+
+static cvar_t build_commit = { "sv_game_build_commit", g_VCSInfo_Commit };
+static cvar_t build_branch = { "sv_game_build_branch", g_VCSInfo_Commit };
 
 cvar_t displaysoundlist = {"displaysoundlist","0"};
 
@@ -464,13 +467,13 @@ cvar_t	sk_player_leg3	= { "sk_player_leg3","1" };
 
 // END Cvars for Skill Level settings
 
+cvar_t sv_pushable_fixed_tick_fudge = { "sv_pushable_fixed_tick_fudge", "15" };
+cvar_t sv_busters = { "sv_busters", "0" };
+
 // Register your console variables here
 // This gets called one time when the game is initialied
 void GameDLLInit( void )
 {
-	// Register cvars here:
-	if( CVAR_GET_POINTER( "build" ) )
-		g_fIsXash3D = TRUE;
 
 	Admin_RegisterCVars();
 
@@ -481,6 +484,9 @@ void GameDLLInit( void )
 	g_psv_developer = CVAR_GET_POINTER( "developer" );
 
 	g_enable_cheats = CVAR_GET_POINTER( "sv_cheats" );
+
+	CVAR_REGISTER( &build_commit );
+	CVAR_REGISTER( &build_branch );
 
 	CVAR_REGISTER( &displaysoundlist );
 	CVAR_REGISTER( &allow_spectators );
@@ -520,6 +526,8 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &mp_clock );
 	CVAR_REGISTER( &mp_allowdrop );
 	CVAR_REGISTER( &mp_dmg_messages );
+
+	CVAR_REGISTER( &sv_busters );
 
 // REGISTER CVARS FOR SKILL LEVEL STUFF
 	// Agrunt
@@ -895,6 +903,8 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_player_leg2 );
 	CVAR_REGISTER( &sk_player_leg3 );
 // END REGISTER CVARS FOR SKILL LEVEL STUFF
+
+	CVAR_REGISTER( &sv_pushable_fixed_tick_fudge );
 
 	SERVER_COMMAND( "exec skill.cfg\n" );
 }

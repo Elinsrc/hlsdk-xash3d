@@ -1392,7 +1392,7 @@ float CBaseMonster::OpenDoorAndWait( entvars_t *pevDoor )
 
 	//ALERT( at_aiconsole, "A door. " );
 	CBaseEntity *pcbeDoor = CBaseEntity::Instance( pevDoor );
-	if( pcbeDoor && !pcbeDoor->IsLockedByMaster() )
+	if( pcbeDoor )
 	{
 		//ALERT( at_aiconsole, "unlocked! " );
 		pcbeDoor->Use( this, this, USE_ON, 0.0 );
@@ -2087,7 +2087,7 @@ void CBaseMonster::StartMonster( void )
 
 		if( !m_pGoalEnt )
 		{
-			ALERT( at_error, "ReadyMonster()--%s couldn't find target %s", STRING( pev->classname ), STRING( pev->target ) );
+			ALERT( at_error, "ReadyMonster()--%s couldn't find target %s\n", STRING( pev->classname ), STRING( pev->target ) );
 		}
 		else
 		{
@@ -2099,7 +2099,7 @@ void CBaseMonster::StartMonster( void )
 			// At this point, we expect only a path_corner as initial goal
 			if( !FClassnameIs( m_pGoalEnt->pev, "path_corner" ) )
 			{
-				ALERT( at_warning, "ReadyMonster--monster's initial goal '%s' is not a path_corner", STRING( pev->target ) );
+				ALERT( at_warning, "ReadyMonster--monster's initial goal '%s' is not a path_corner\n", STRING( pev->target ) );
 			}
 #endif
 			// set the monster up to walk a path corner path. 
@@ -3187,27 +3187,6 @@ BOOL CBaseMonster::FCanActiveIdle( void )
 	}
 	*/
 	return FALSE;
-}
-
-void CBaseMonster::PlaySentence( const char *pszSentence, float duration, float volume, float attenuation )
-{
-	if( pszSentence && IsAlive() )
-	{
-		if( pszSentence[0] == '!' )
-			EMIT_SOUND_DYN( edict(), CHAN_VOICE, pszSentence, volume, attenuation, 0, PITCH_NORM );
-		else
-			SENTENCEG_PlayRndSz( edict(), pszSentence, volume, attenuation, 0, PITCH_NORM );
-	}
-}
-
-void CBaseMonster::PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener )
-{
-	PlaySentence( pszSentence, duration, volume, attenuation );
-}
-
-void CBaseMonster::SentenceStop( void )
-{
-	EMIT_SOUND( edict(), CHAN_VOICE, "common/null.wav", 1.0, ATTN_IDLE );
 }
 
 void CBaseMonster::CorpseFallThink( void )

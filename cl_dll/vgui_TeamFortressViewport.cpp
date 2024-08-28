@@ -58,6 +58,8 @@
 #include "screenfade.h"
 
 void IN_SetVisibleMouse(bool visible);
+void IgnoreNextMouseDelta();
+
 class CCommandMenu;
 
 // Scoreboard positions
@@ -673,7 +675,7 @@ int TeamFortressViewport::CreateCommandMenu( const char *menuFile, int direction
 		return newIndex;
 	}
 
-#ifdef _WIN32
+#if XASH_WIN32
 	try
 	{
 #endif
@@ -841,7 +843,7 @@ int TeamFortressViewport::CreateCommandMenu( const char *menuFile, int direction
 					{
 						gEngfuncs.Con_Printf( "Too many menus in %s past '%s'\n", menuFile, szLastButtonText );
 					}
-					else
+					else if( pButton )
 					{
 						// Create the menu
 						m_pCommandMenus[m_iNumMenus] = CreateSubMenu( pButton, m_pCurrentCommandMenu, iButtonY );
@@ -873,7 +875,7 @@ int TeamFortressViewport::CreateCommandMenu( const char *menuFile, int direction
 
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
 		}
-#ifdef _WIN32
+#if XASH_WIN32
 	}
 	catch( CException *e )
 	{
@@ -1672,6 +1674,7 @@ void TeamFortressViewport::UpdateCursorState()
 	if( m_pSpectatorPanel->m_menuVisible || m_pCurrentMenu || m_pTeamMenu->isVisible() || GetClientVoiceMgr()->IsInSquelchMode() )
 	{
 		IN_SetVisibleMouse(true);
+		IgnoreNextMouseDelta();
 		App::getInstance()->setCursorOveride( App::getInstance()->getScheme()->getCursor(Scheme::scu_arrow) );
 		return;
 	}
@@ -1681,6 +1684,7 @@ void TeamFortressViewport::UpdateCursorState()
 		if( gHUD.m_pCvarStealMouse->value != 0.0f )
 		{
 			IN_SetVisibleMouse(true);
+			IgnoreNextMouseDelta();
 			App::getInstance()->setCursorOveride( App::getInstance()->getScheme()->getCursor(Scheme::scu_arrow) );
 			return;
 		}
